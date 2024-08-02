@@ -27,10 +27,17 @@ This will add the latest version of Denim to your project's dependencies.
 
 ## Usage
 
+To import straight from JSR, 
+
+```typescript
+import { ThreadsPostRequest, createThreadsContainer, publishThreadsContainer } from 'jsr:@codybrom/denim@^1.0.2';
+```
+
+
 ### Basic Usage
 
 ```typescript
-import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "@codybrom/denim/";
+import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim@^1.0.2";
 
 const request: ThreadsPostRequest = {
   userId: "YOUR_USER_ID",
