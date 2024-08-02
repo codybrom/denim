@@ -1,15 +1,49 @@
+/**
+ * @module
+ *
+ * This module provides functions to interact with the Threads API,
+ * allowing users to create and publish posts on Threads.
+ */
+
+/** The base URL for the Threads API */
 export const THREADS_API_BASE_URL = "https://graph.threads.net/v1.0";
 
+/**
+ * Represents a request to post content on Threads.
+ */
 export interface ThreadsPostRequest {
+  /** The user ID of the Threads account */
   userId: string;
+  /** The access token for authentication */
   accessToken: string;
+  /** The type of media being posted */
   mediaType: "TEXT" | "IMAGE" | "VIDEO";
+  /** The text content of the post (optional) */
   text?: string;
+  /** The URL of the image to be posted (optional) */
   imageUrl?: string;
+  /** The URL of the video to be posted (optional) */
   videoUrl?: string;
 }
 
-// Create a Threads media container
+/**
+ * Creates a Threads media container.
+ *
+ * @param request - The ThreadsPostRequest object containing post details
+ * @returns A Promise that resolves to the container ID
+ * @throws Will throw an error if the API request fails
+ *
+ * @example
+ * ```typescript
+ * const request: ThreadsPostRequest = {
+ *   userId: "123456",
+ *   accessToken: "your_access_token",
+ *   mediaType: "TEXT",
+ *   text: "Hello, Threads!"
+ * };
+ * const containerId = await createThreadsContainer(request);
+ * ```
+ */
 export async function createThreadsContainer(
   request: ThreadsPostRequest
 ): Promise<string> {
@@ -52,7 +86,20 @@ export async function createThreadsContainer(
   }
 }
 
-// Publish a Threads media container
+/**
+ * Publishes a Threads media container.
+ *
+ * @param userId - The user ID of the Threads account
+ * @param accessToken - The access token for authentication
+ * @param containerId - The ID of the container to publish
+ * @returns A Promise that resolves to the published post ID
+ * @throws Will throw an error if the API request fails
+ *
+ * @example
+ * ```typescript
+ * const publishedId = await publishThreadsContainer("123456", "your_access_token", "container_id");
+ * ```
+ */
 export async function publishThreadsContainer(
   userId: string,
   accessToken: string,
@@ -89,7 +136,19 @@ export async function publishThreadsContainer(
   }
 }
 
-// Serve the requests
+/**
+ * Serves HTTP requests to create and publish Threads posts.
+ *
+ * This function sets up a server that listens for POST requests
+ * containing ThreadsPostRequest data. It creates a container and
+ * immediately publishes it.
+ *
+ * @example
+ * ```typescript
+ * // Start the server
+ * serveRequests();
+ * ```
+ */
 export function serveRequests() {
   Deno.serve(async (req) => {
     if (req.method !== "POST") {
