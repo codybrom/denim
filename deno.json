@@ -1,6 +1,6 @@
 {
     "name": "@codybrom/denim",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "A Deno function that posts to Threads with text, image, or video.",
     "entry": "./mod.ts",
     "exports": {
