@@ -1,6 +1,7 @@
 # @codybrom/denim: Threads API Wrapper for Deno
 
-[![JSR](https://jsr.io/badges/@codybrom/denim)](https://jsr.io/@codybrom/denim>)
+[![JSR](https://jsr.io/badges/@codybrom/denim)](https://jsr.io/@codybrom/denim>) [![JSR Score](https://jsr.io/badges/@codybrom/denim/score)](https://jsr.io/@codybrom/denim)
+
 
 
 Denim is a Deno module that provides a simple interface for posting single Threads posts using text, images, or videos.
