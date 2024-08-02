@@ -1,4 +1,4 @@
-# @codybrom/denim
+# Denim
 
 [![JSR](https://jsr.io/badges/@codybrom/denim)](https://jsr.io/@codybrom/denim) [![JSR Score](https://jsr.io/badges/@codybrom/denim/score)](https://jsr.io/@codybrom/denim)
 
