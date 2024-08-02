@@ -1,4 +1,7 @@
-# Denim: Threads API Wrapper for Deno
+# @codybrom/denim: Threads API Wrapper for Deno
+
+[![JSR](https://jsr.io/badges/@codybrom/denim)](https://jsr.io/@codybrom/denim>)
+
 
 Denim is a Deno module that provides a simple interface for posting single Threads posts using text, images, or videos.
 
@@ -11,18 +14,22 @@ Denim is a Deno module that provides a simple interface for posting single Threa
 
 ## Installation
 
-To use Denim in your Deno project, you can import it directly from the GitHub repository:
+### Using with Deno
 
-```typescript
-import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "https://raw.githubusercontent.com/codybrom/denim/main/mod.ts";
+To add Denim to your Deno project, you can use the following command:
+
+```bash
+deno add @codybrom/denim
 ```
+
+This will add the latest version of Denim to your project's dependencies.
 
 ## Usage
 
 ### Basic Usage
 
 ```typescript
-import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "https://raw.githubusercontent.com/codybrom/denim/main/mod.ts";
+import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "@codybrom/denim/";
 
 const request: ThreadsPostRequest = {
   userId: "YOUR_USER_ID",
@@ -125,6 +132,8 @@ curl -X POST <YOUR_FUNCTION_URI> \
     "videoUrl": "https://example.com/video.mp4"
   }'
 ```
+
+Note: Replace with your actual authorization headers if your edge function requires them (or remove them).
 
 ## Security Note
 
