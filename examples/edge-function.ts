@@ -1,10 +1,10 @@
 // examples/edge-function.ts
 
 import {
+  type ThreadsPostRequest,
   createThreadsContainer,
   publishThreadsContainer,
-  type ThreadsPostRequest,
-} from "../mod.ts";
+} from "jsr:@codybrom/denim@^1.0.2";
 
 async function postToThreads(request: ThreadsPostRequest): Promise<string> {
   try {
