@@ -17,3 +17,8 @@ jobs:
 
       - name: Publish package
         run: npx jsr publish
+        
+      - name: Publish package to NPM
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
