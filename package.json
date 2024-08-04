@@ -1,5 +1,5 @@
 {
-  "name": "denim",
+  "name": "@codybrom/denim",
   "version": "1.0.2",
   "description": "Typescript/Deno module to simplify posting to Threads with text, images, or videos",
   "main": "mod.ts",
