@@ -369,21 +369,3 @@ export async function getPublishingLimit(
 
   return data.data[0];
 }
-
-/**
- * Checks the health status of the Threads API.
- *
- * @returns A Promise that resolves to the health status
- */
-export async function checkHealth(): Promise<{ status: string }> {
-  const response = await fetch(`${THREADS_API_BASE_URL}/health`);
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      `Health check failed: ${data.error?.message || response.statusText}`
-    );
-  }
-
-  return data;
-}

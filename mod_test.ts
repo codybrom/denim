@@ -8,7 +8,6 @@ import {
   publishThreadsContainer,
   createCarouselItem,
   getPublishingLimit,
-  checkHealth,
   type ThreadsPostRequest,
 } from "./mod.ts";
 
@@ -499,31 +498,4 @@ Deno.test("getPublishingLimit should throw error on failure", async () => {
     Error,
     "Failed to get publishing limit"
   );
-});
-
-Deno.test("checkHealth should return OK status", async () => {
-  globalThis.fetch = (_input: string | URL | Request): Promise<Response> => {
-    return Promise.resolve({
-      ok: true,
-      status: 200,
-      json: () => Promise.resolve({ status: "ok" }),
-    } as Response);
-  };
-
-  const result = await checkHealth();
-  assertEquals(result.status, "ok");
-});
-
-Deno.test("checkHealth should throw error on failure", async () => {
-  globalThis.fetch = (_input: string | URL | Request): Promise<Response> => {
-    return Promise.resolve({
-      ok: false,
-      status: 500,
-      statusText: "Internal Server Error",
-      json: () =>
-        Promise.resolve({ error: { message: "Service unavailable" } }),
-    } as Response);
-  };
-
-  await assertRejects(() => checkHealth(), Error, "Health check failed");
 });

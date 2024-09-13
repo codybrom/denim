@@ -12,7 +12,6 @@
 - Attach links to text posts
 - Geo-gate content to specific countries
 - Control who can reply to posts
-- Check API health status
 - Retrieve publishing rate limit information
 - Ready to deploy as an edge function
 
@@ -33,20 +32,13 @@ This will add the latest version of Denim to your project's dependencies.
 To import straight from JSR:
 
 ```typescript
-import { ThreadsPostRequest, createThreadsContainer, publishThreadsContainer } from 'jsr:@codybrom/denim@^1.1.0';
+import { ThreadsPostRequest, createThreadsContainer, publishThreadsContainer } from 'jsr:@codybrom/denim@^1.2.0';
 ```
 
 ### Basic Usage
 
 ```typescript
-import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim@^1.1.0";
-
-// Check API health before posting
-const healthStatus = await checkHealth();
-if (healthStatus.status !== "ok") {
-  console.error("API is not healthy. Status:", healthStatus.status);
-  return;
-}
+import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim@^1.2.0";
 
 const request: ThreadsPostRequest = {
   userId: "YOUR_USER_ID",
@@ -64,19 +56,6 @@ const containerId = await createThreadsContainer(request);
 const publishedId = await publishThreadsContainer(request.userId, request.accessToken, containerId);
 
 console.log(`Post published with ID: ${publishedId}`);
-```
-
-#### Checking API Health
-
-```typescript
-import { checkHealth } from "jsr:@codybrom/denim@^1.2.0";
-
-try {
-  const healthStatus = await checkHealth();
-  console.log("API Health Status:", healthStatus.status);
-} catch (error) {
-  console.error("Failed to check API health:", error);
-}
 ```
 
 #### Retrieving Publishing Rate Limit
