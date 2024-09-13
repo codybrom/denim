@@ -32,13 +32,13 @@ This will add the latest version of Denim to your project's dependencies.
 To import straight from JSR:
 
 ```typescript
-import { ThreadsPostRequest, createThreadsContainer, publishThreadsContainer } from 'jsr:@codybrom/denim@^1.2.0';
+import { ThreadsPostRequest, createThreadsContainer, publishThreadsContainer } from 'jsr:@codybrom/denim@^1.3.0';
 ```
 
 ### Basic Usage
 
 ```typescript
-import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim@^1.2.0";
+import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim@^1.3.0";
 
 const request: ThreadsPostRequest = {
   userId: "YOUR_USER_ID",
@@ -61,7 +61,7 @@ console.log(`Post published with ID: ${publishedId}`);
 #### Retrieving Publishing Rate Limit
 
 ```typescript
-import { getPublishingLimit } from "jsr:@codybrom/denim@^1.2.0";
+import { getPublishingLimit } from "jsr:@codybrom/denim@^1.3.0";
 
 const userId = "YOUR_USER_ID";
 const accessToken = "YOUR_ACCESS_TOKEN";
@@ -126,7 +126,7 @@ const videoRequest: ThreadsPostRequest = {
 };
 ```
 
-#### Video Post with Alt Text, Reply Control and Geo-gating
+#### Video Post with Alt Text, Reply Control and Geo-gating* (requires special account permission)
 
 ```typescript
 const videoRequest: ThreadsPostRequest = {
@@ -171,7 +171,6 @@ const carouselRequest: ThreadsPostRequest = {
   text: "Check out this carousel post!",
   children: [item1Id, item2Id],
   replyControl: "everyone",
-  allowlistedCountryCodes: ["US", "CA", "MX"],
 };
 
 const containerId = await createThreadsContainer(carouselRequest);

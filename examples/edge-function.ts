@@ -5,18 +5,11 @@ import {
   createThreadsContainer,
   publishThreadsContainer,
   createCarouselItem,
-  checkHealth,
   getPublishingLimit,
-} from "jsr:@codybrom/denim@^1.1.0";
+} from "jsr:@codybrom/denim@1.3.0";
 
 async function postToThreads(request: ThreadsPostRequest): Promise<string> {
   try {
-    // Check API health before posting
-    const healthStatus = await checkHealth();
-    if (healthStatus.status !== "ok") {
-      throw new Error(`API is not healthy. Status: ${healthStatus.status}`);
-    }
-
     // Check rate limit
     const rateLimit = await getPublishingLimit(
       request.userId,
@@ -49,118 +42,105 @@ async function postToThreads(request: ThreadsPostRequest): Promise<string> {
 
 Deno.serve(async (req: Request) => {
   const url = new URL(req.url);
+  const paths = url.pathname.split("/").filter((segment) => segment !== "");
 
-  // Health check endpoint
-  if (req.method === "GET" && url.pathname === "/health") {
-    try {
-      const healthStatus = await checkHealth();
-      return new Response(JSON.stringify(healthStatus), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } catch (error) {
-      return new Response(
-        JSON.stringify({ status: "error", message: error.message }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-  }
-
-  // Rate limit check endpoint
-  if (req.method === "GET" && url.pathname === "/rate-limit") {
-    const userId = url.searchParams.get("userId");
-    const accessToken = url.searchParams.get("accessToken");
-
-    if (!userId || !accessToken) {
-      return new Response(
-        JSON.stringify({ error: "Missing userId or accessToken" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    try {
-      const rateLimit = await getPublishingLimit(userId, accessToken);
-      return new Response(JSON.stringify(rateLimit), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } catch (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-  }
-
-  // Main posting endpoint
-  if (req.method === "POST" && url.pathname === "/post") {
-    try {
-      const body = await req.json();
-
-      if (!body.userId || !body.accessToken || !body.mediaType) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Missing required fields" }),
-          {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
+  switch (req.method) {
+    case "GET": {
+      switch (paths[1]) {
+        case "rate-limit": {
+          const userId = url.searchParams.get("userId");
+          const accessToken = url.searchParams.get("accessToken");
+          if (!userId || !accessToken) {
+            return new Response(
+              JSON.stringify({ error: "Missing userId or accessToken" }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              }
+            );
           }
-        );
-      }
-
-      const postRequest: ThreadsPostRequest = {
-        userId: body.userId,
-        accessToken: body.accessToken,
-        mediaType: body.mediaType,
-        text: body.text,
-        imageUrl: body.imageUrl,
-        videoUrl: body.videoUrl,
-        altText: body.altText,
-        linkAttachment: body.linkAttachment,
-        allowlistedCountryCodes: body.allowlistedCountryCodes,
-        replyControl: body.replyControl,
-        children: body.children,
-      };
-
-      if (postRequest.mediaType === "CAROUSEL" && body.carouselItems) {
-        postRequest.children = [];
-        for (const item of body.carouselItems) {
-          const itemId = await createCarouselItem({
-            userId: postRequest.userId,
-            accessToken: postRequest.accessToken,
-            mediaType: item.mediaType,
-            imageUrl: item.imageUrl,
-            videoUrl: item.videoUrl,
-            altText: item.altText,
-          });
-          postRequest.children.push(itemId);
+          try {
+            const rateLimit = await getPublishingLimit(userId, accessToken);
+            return new Response(JSON.stringify(rateLimit), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
+          } catch (error) {
+            return new Response(JSON.stringify({ error: error.message }), {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
+            });
+          }
+        }
+        default: {
+          return new Response("Not Found", { status: 404 });
         }
       }
-
-      const publishedId = await postToThreads(postRequest);
-
-      return new Response(JSON.stringify({ success: true, publishedId }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } catch (error) {
-      console.error("Error processing request:", error);
-      return new Response(
-        JSON.stringify({ success: false, error: error.message }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
     }
+    case "POST": {
+      if (paths[1] === "post") {
+        try {
+          const body = await req.json();
+          if (!body.userId || !body.accessToken || !body.mediaType) {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: "Missing required fields",
+              }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              }
+            );
+          }
+          const postRequest: ThreadsPostRequest = {
+            userId: body.userId,
+            accessToken: body.accessToken,
+            mediaType: body.mediaType,
+            text: body.text,
+            imageUrl: body.imageUrl,
+            videoUrl: body.videoUrl,
+            altText: body.altText,
+            linkAttachment: body.linkAttachment,
+            allowlistedCountryCodes: body.allowlistedCountryCodes,
+            replyControl: body.replyControl,
+            children: body.children,
+          };
+          if (postRequest.mediaType === "CAROUSEL" && body.carouselItems) {
+            postRequest.children = [];
+            for (const item of body.carouselItems) {
+              const itemId = await createCarouselItem({
+                userId: postRequest.userId,
+                accessToken: postRequest.accessToken,
+                mediaType: item.mediaType,
+                imageUrl: item.imageUrl,
+                videoUrl: item.videoUrl,
+                altText: item.altText,
+              });
+              postRequest.children.push(itemId);
+            }
+          }
+          const publishedId = await postToThreads(postRequest);
+          return new Response(JSON.stringify({ success: true, publishedId }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        } catch (error) {
+          console.error("Error processing request:", error);
+          return new Response(
+            JSON.stringify({ success: false, error: error.message }),
+            {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+      }
+      return new Response("Not Found", { status: 404 });
+    }
+    default:
+      return new Response("Method Not Allowed", { status: 405 });
   }
-
-  return new Response("Not Found", { status: 404 });
 });
 
 /*
