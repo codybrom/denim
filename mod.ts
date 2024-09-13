@@ -58,7 +58,7 @@ export interface ThreadsPostRequest {
  */
 export async function createThreadsContainer(
   request: ThreadsPostRequest
-): Promise<{ containerId: string; mediaType: string }> {
+): Promise<{ containerId: number; mediaType: string }> {
   // Input validation
   validateRequest(request);
 
@@ -111,7 +111,7 @@ export async function createThreadsContainer(
 
   try {
     const data = JSON.parse(responseText);
-    return { containerId: data.id, mediaType: request.mediaType };
+    return { containerId: parseInt(data.id, 10), mediaType: request.mediaType };
   } catch (error) {
     console.error(`Failed to parse response JSON: ${error}`);
     throw new Error(`Invalid response from Threads API: ${responseText}`);
@@ -272,7 +272,7 @@ async function checkContainerStatus(
  *
  * @param userId - The user ID of the Threads account
  * @param accessToken - The access token for authentication
- * @param containerId - The ID of the container to publish
+ * @param containerId - The ID of the container to publish (as a number)
  * @param mediaType - The type of media being published
  * @returns A Promise that resolves to the published container ID
  * @throws Will throw an error if the API request fails, if publishing times out, or if the container is not ready (for videos)
@@ -280,24 +280,27 @@ async function checkContainerStatus(
  * @example
  * ```typescript
  * const { containerId, mediaType } = await createThreadsContainer(request);
- * const publishedId = await publishThreadsContainer("123456", "your_access_token", containerId, mediaType);
+ * const publishedId = await publishThreadsContainer("123456", "your_access_token", parseInt(containerId, 10), mediaType);
  * ```
  */
 export async function publishThreadsContainer(
   userId: string,
   accessToken: string,
-  containerId: string,
+  containerId: number,
   mediaType: string
-): Promise<string> {
+): Promise<number> {
   if (mediaType === "VIDEO") {
     // Check container status before publishing for videos
-    let status = await checkContainerStatus(containerId, accessToken);
+    let status = await checkContainerStatus(
+      containerId.toString(),
+      accessToken
+    );
     let attempts = 0;
     const maxAttempts = 10; // Increased from 5 to 10 for videos
 
     while (status !== "FINISHED" && attempts < maxAttempts) {
       await new Promise((resolve) => setTimeout(resolve, 30000)); // Wait for 30 seconds
-      status = await checkContainerStatus(containerId, accessToken);
+      status = await checkContainerStatus(containerId.toString(), accessToken);
       attempts++;
       console.log(
         `Video container status check attempt ${attempts}: ${status}`
@@ -314,7 +317,7 @@ export async function publishThreadsContainer(
   const publishUrl = `${THREADS_API_BASE_URL}/${userId}/threads_publish`;
   const publishBody = new URLSearchParams({
     access_token: accessToken,
-    creation_id: containerId,
+    creation_id: containerId.toString(), // Convert to string for URLSearchParams, but it will be sent as a number
   });
 
   const publishResponse = await fetch(publishUrl, {
@@ -336,7 +339,10 @@ export async function publishThreadsContainer(
 
   // For non-video posts, we still need to check if the post was actually published
   if (mediaType !== "VIDEO") {
-    let status = await checkContainerStatus(containerId, accessToken);
+    let status = await checkContainerStatus(
+      containerId.toString(),
+      accessToken
+    );
     let attempts = 0;
     const maxAttempts = 5;
 
@@ -346,7 +352,7 @@ export async function publishThreadsContainer(
       attempts < maxAttempts
     ) {
       await new Promise((resolve) => setTimeout(resolve, 60000)); // Wait for 1 minute
-      status = await checkContainerStatus(containerId, accessToken);
+      status = await checkContainerStatus(containerId.toString(), accessToken);
       attempts++;
     }
 
@@ -414,9 +420,12 @@ export function serveRequests() {
         mediaType
       );
 
-      return new Response(JSON.stringify({ success: true, publishedId }), {
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ success: true, publishedId: publishedId.toString() }),
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     } catch (error) {
       console.error("Error posting to Threads:", error);
       return new Response(
