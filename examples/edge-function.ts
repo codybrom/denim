@@ -4,10 +4,28 @@ import {
   type ThreadsPostRequest,
   createThreadsContainer,
   publishThreadsContainer,
-} from "jsr:@codybrom/denim@^1.0.2";
+  createCarouselItem,
+  checkHealth,
+  getPublishingLimit,
+} from "jsr:@codybrom/denim@^1.1.0";
 
 async function postToThreads(request: ThreadsPostRequest): Promise<string> {
   try {
+    // Check API health before posting
+    const healthStatus = await checkHealth();
+    if (healthStatus.status !== "ok") {
+      throw new Error(`API is not healthy. Status: ${healthStatus.status}`);
+    }
+
+    // Check rate limit
+    const rateLimit = await getPublishingLimit(
+      request.userId,
+      request.accessToken
+    );
+    if (rateLimit.quota_usage >= rateLimit.config.quota_total) {
+      throw new Error("Rate limit exceeded. Please try again later.");
+    }
+
     if (request.mediaType === "VIDEO" && request.videoUrl) {
       delete request.imageUrl;
     }
@@ -30,42 +48,35 @@ async function postToThreads(request: ThreadsPostRequest): Promise<string> {
 }
 
 Deno.serve(async (req: Request) => {
+  const url = new URL(req.url);
+
   // Health check endpoint
-  if (req.method === "GET" && new URL(req.url).pathname === "/health") {
-    return new Response(JSON.stringify({ status: "ok" }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
-  }
-
-  // Log incoming request (without sensitive data)
-  console.log(`Received ${req.method} request to ${new URL(req.url).pathname}`);
-
-  try {
-    let body;
+  if (req.method === "GET" && url.pathname === "/health") {
     try {
-      body = await req.json();
+      const healthStatus = await checkHealth();
+      return new Response(JSON.stringify(healthStatus), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     } catch (error) {
       return new Response(
-        JSON.stringify({
-          success: false,
-          error: "Invalid JSON in request body",
-          details: error.message,
-        }),
+        JSON.stringify({ status: "error", message: error.message }),
         {
-          status: 400,
+          status: 500,
           headers: { "Content-Type": "application/json" },
         }
       );
     }
+  }
 
-    if (!body.userId || !body.accessToken || !body.mediaType) {
+  // Rate limit check endpoint
+  if (req.method === "GET" && url.pathname === "/rate-limit") {
+    const userId = url.searchParams.get("userId");
+    const accessToken = url.searchParams.get("accessToken");
+
+    if (!userId || !accessToken) {
       return new Response(
-        JSON.stringify({ success: false, error: "Missing required fields" }),
+        JSON.stringify({ error: "Missing userId or accessToken" }),
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
@@ -73,31 +84,83 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const postRequest: ThreadsPostRequest = {
-      userId: body.userId,
-      accessToken: body.accessToken,
-      mediaType: body.mediaType,
-      text: body.text,
-      imageUrl: body.imageUrl,
-      videoUrl: body.videoUrl,
-    };
-
-    const publishedId = await postToThreads(postRequest);
-
-    return new Response(JSON.stringify({ success: true, publishedId }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error("Error processing request:", error);
-    return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      {
+    try {
+      const rateLimit = await getPublishingLimit(userId, accessToken);
+      return new Response(JSON.stringify(rateLimit), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
-      }
-    );
+      });
+    }
   }
+
+  // Main posting endpoint
+  if (req.method === "POST" && url.pathname === "/post") {
+    try {
+      const body = await req.json();
+
+      if (!body.userId || !body.accessToken || !body.mediaType) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Missing required fields" }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      const postRequest: ThreadsPostRequest = {
+        userId: body.userId,
+        accessToken: body.accessToken,
+        mediaType: body.mediaType,
+        text: body.text,
+        imageUrl: body.imageUrl,
+        videoUrl: body.videoUrl,
+        altText: body.altText,
+        linkAttachment: body.linkAttachment,
+        allowlistedCountryCodes: body.allowlistedCountryCodes,
+        replyControl: body.replyControl,
+        children: body.children,
+      };
+
+      if (postRequest.mediaType === "CAROUSEL" && body.carouselItems) {
+        postRequest.children = [];
+        for (const item of body.carouselItems) {
+          const itemId = await createCarouselItem({
+            userId: postRequest.userId,
+            accessToken: postRequest.accessToken,
+            mediaType: item.mediaType,
+            imageUrl: item.imageUrl,
+            videoUrl: item.videoUrl,
+            altText: item.altText,
+          });
+          postRequest.children.push(itemId);
+        }
+      }
+
+      const publishedId = await postToThreads(postRequest);
+
+      return new Response(JSON.stringify({ success: true, publishedId }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      console.error("Error processing request:", error);
+      return new Response(
+        JSON.stringify({ success: false, error: error.message }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+  }
+
+  return new Response("Not Found", { status: 404 });
 });
 
 /*
@@ -105,32 +168,33 @@ Deno.serve(async (req: Request) => {
   
   1. Deploy this file to your serverless platform that supports Deno.
   
-  2. Send POST requests to <YOUR_FUNCTION_URI> with JSON body containing:
-     - YOUR_AUTH_KEY: Your custom authorization key (if used, otherwise remove the header)
-     - userId: Your Threads user ID
-     - accessToken: Your Threads API access token
-     - mediaType: "TEXT", "IMAGE", or "VIDEO"
-     - text: The text content of your post
-     - imageUrl: URL of the image (for IMAGE posts)
-     - videoUrl: URL of the video (for VIDEO posts)
-  
+  2. Send requests to <YOUR_FUNCTION_URI> with the following endpoints:
+     
+     GET /health - Check the API health status
+     GET /rate-limit?userId=YOUR_USER_ID&accessToken=YOUR_ACCESS_TOKEN - Check rate limit
+     POST /post - Create and publish a post (see below for details)
+
   Example curl commands:
   
+  # Check API health
+  curl -X GET <YOUR_FUNCTION_URI>/health
+
+  # Check rate limit
+  curl -X GET "<YOUR_FUNCTION_URI>/rate-limit?userId=YOUR_USER_ID&accessToken=YOUR_ACCESS_TOKEN"
+
   # Post a text-only Thread
-  curl -X POST <YOUR_FUNCTION_URI> \
+  curl -X POST <YOUR_FUNCTION_URI>/post \
     -H "Content-Type: application/json" \
-    -H "Authorization: Bearer YOUR_AUTH_KEY" \
     -d '{
       "userId": "YOUR_USER_ID",
       "accessToken": "YOUR_ACCESS_TOKEN",
       "mediaType": "TEXT",
       "text": "Hello from Denim!"
     }'
-  
+
   # Post an image Thread
-  curl -X POST <YOUR_FUNCTION_URI> \
+  curl -X POST <YOUR_FUNCTION_URI>/post \
     -H "Content-Type: application/json" \
-    -H "Authorization: Bearer YOUR_AUTH_KEY" \
     -d '{
       "userId": "YOUR_USER_ID",
       "accessToken": "YOUR_ACCESS_TOKEN",
@@ -140,9 +204,8 @@ Deno.serve(async (req: Request) => {
     }'
   
   # Post a video Thread
-  curl -X POST <YOUR_FUNCTION_URI> \
+  curl -X POST <YOUR_FUNCTION_URI>/post \
     -H "Content-Type: application/json" \
-    -H "Authorization: Bearer YOUR_AUTH_KEY" \
     -d '{
       "userId": "YOUR_USER_ID",
       "accessToken": "YOUR_ACCESS_TOKEN",
@@ -151,9 +214,31 @@ Deno.serve(async (req: Request) => {
       "videoUrl": "https://example.com/video.mp4"
     }'
   
+  # Post a carousel Thread
+  curl -X POST <YOUR_FUNCTION_URI>/post \
+    -H "Content-Type: application/json" \
+    -d '{
+      "userId": "YOUR_USER_ID",
+      "accessToken": "YOUR_ACCESS_TOKEN",
+      "mediaType": "CAROUSEL",
+      "text": "Check out this carousel!",
+      "carouselItems": [
+        {
+          "mediaType": "IMAGE",
+          "imageUrl": "https://example.com/image1.jpg",
+          "altText": "First image"
+        },
+        {
+          "mediaType": "VIDEO",
+          "videoUrl": "https://example.com/video.mp4",
+          "altText": "A video"
+        }
+      ]
+    }'
+  
   Note: If both videoUrl and imageUrl are provided in a request with mediaType "VIDEO",
   the imageUrl will be ignored, and only the video will be posted.
-  
+
   Security Note: Ensure that your function is deployed with appropriate access controls
   and authentication mechanisms to protect sensitive data like access tokens.
   */

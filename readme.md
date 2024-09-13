@@ -6,10 +6,15 @@
 
 ## Features
 
-- Create and publish posts on Threads
-- Support for text-only, image, and video posts
-- Easy-to-use API
-- Deployable as an edge function
+- Create and publish posts on Threads with an easy-use-API
+- Supports text-only, image, video, and carousel posts
+- Add alt text to image and video posts
+- Attach links to text posts
+- Geo-gate content to specific countries
+- Control who can reply to posts
+- Check API health status
+- Retrieve publishing rate limit information
+- Ready to deploy as an edge function
 
 ## Installation
 
@@ -25,23 +30,31 @@ This will add the latest version of Denim to your project's dependencies.
 
 ## Usage
 
-To import straight from JSR, 
+To import straight from JSR:
 
 ```typescript
-import { ThreadsPostRequest, createThreadsContainer, publishThreadsContainer } from 'jsr:@codybrom/denim@^1.0.2';
+import { ThreadsPostRequest, createThreadsContainer, publishThreadsContainer } from 'jsr:@codybrom/denim@^1.1.0';
 ```
-
 
 ### Basic Usage
 
 ```typescript
-import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim@^1.0.2";
+import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim@^1.1.0";
+
+// Check API health before posting
+const healthStatus = await checkHealth();
+if (healthStatus.status !== "ok") {
+  console.error("API is not healthy. Status:", healthStatus.status);
+  return;
+}
 
 const request: ThreadsPostRequest = {
   userId: "YOUR_USER_ID",
   accessToken: "YOUR_ACCESS_TOKEN",
   mediaType: "TEXT",
-  text: "Hello, Threads!",
+  text: "Check out Denim on GitHub!",
+  linkAttachment: "https://github.com/codybrom/denim",
+  replyControl: "everyone",
 };
 
 // Create a container
@@ -51,6 +64,37 @@ const containerId = await createThreadsContainer(request);
 const publishedId = await publishThreadsContainer(request.userId, request.accessToken, containerId);
 
 console.log(`Post published with ID: ${publishedId}`);
+```
+
+#### Checking API Health
+
+```typescript
+import { checkHealth } from "jsr:@codybrom/denim@^1.2.0";
+
+try {
+  const healthStatus = await checkHealth();
+  console.log("API Health Status:", healthStatus.status);
+} catch (error) {
+  console.error("Failed to check API health:", error);
+}
+```
+
+#### Retrieving Publishing Rate Limit
+
+```typescript
+import { getPublishingLimit } from "jsr:@codybrom/denim@^1.2.0";
+
+const userId = "YOUR_USER_ID";
+const accessToken = "YOUR_ACCESS_TOKEN";
+
+try {
+  const rateLimit = await getPublishingLimit(userId, accessToken);
+  console.log("Current usage:", rateLimit.quota_usage);
+  console.log("Total quota:", rateLimit.config.quota_total);
+  console.log("Quota duration (seconds):", rateLimit.config.quota_duration);
+} catch (error) {
+  console.error("Failed to retrieve rate limit information:", error);
+}
 ```
 
 ### Posting Different Media Types
@@ -66,7 +110,19 @@ const textRequest: ThreadsPostRequest = {
 };
 ```
 
-#### Image Post
+#### Text Post with Link Attachment
+
+```typescript
+const textRequest: ThreadsPostRequest = {
+  userId: "YOUR_USER_ID",
+  accessToken: "YOUR_ACCESS_TOKEN",
+  mediaType: "TEXT",
+  text: "This is a post with an attached link on Threads!",
+  linkAttachment: "https://example.com",
+};
+```
+
+#### Image Post with Alt Text
 
 ```typescript
 const imageRequest: ThreadsPostRequest = {
@@ -75,6 +131,7 @@ const imageRequest: ThreadsPostRequest = {
   mediaType: "IMAGE",
   text: "Check out this image!",
   imageUrl: "https://example.com/image.jpg",
+  altText: "A beautiful sunset over the ocean",
 };
 ```
 
@@ -88,6 +145,60 @@ const videoRequest: ThreadsPostRequest = {
   text: "Watch this video!",
   videoUrl: "https://example.com/video.mp4",
 };
+```
+
+#### Video Post with Alt Text, Reply Control and Geo-gating
+
+```typescript
+const videoRequest: ThreadsPostRequest = {
+  userId: "YOUR_USER_ID",
+  accessToken: "YOUR_ACCESS_TOKEN",
+  mediaType: "VIDEO",
+  text: "Watch this video!",
+  videoUrl: "https://example.com/video.mp4",
+  altText: "A tutorial on how to make a chocolate cake",
+  allowlistedCountryCodes: ["US", "GB"],
+  replyControl: "mentioned_only",
+};
+```
+
+#### Carousel Post
+
+```typescript
+import { createCarouselItem, createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim@^1.0.4";
+
+// First, create carousel items
+const item1Id = await createCarouselItem({
+  userId: "YOUR_USER_ID",
+  accessToken: "YOUR_ACCESS_TOKEN",
+  mediaType: "IMAGE",
+  imageUrl: "https://example.com/image1.jpg",
+  altText: "First image in the carousel",
+});
+
+const item2Id = await createCarouselItem({
+  userId: "YOUR_USER_ID",
+  accessToken: "YOUR_ACCESS_TOKEN",
+  mediaType: "VIDEO",
+  videoUrl: "https://example.com/video.mp4",
+  altText: "Video in the carousel",
+});
+
+// Then, create the carousel post
+const carouselRequest: ThreadsPostRequest = {
+  userId: "YOUR_USER_ID",
+  accessToken: "YOUR_ACCESS_TOKEN",
+  mediaType: "CAROUSEL",
+  text: "Check out this carousel post!",
+  children: [item1Id, item2Id],
+  replyControl: "everyone",
+  allowlistedCountryCodes: ["US", "CA", "MX"],
+};
+
+const containerId = await createThreadsContainer(carouselRequest);
+const publishedId = await publishThreadsContainer(carouselRequest.userId, carouselRequest.accessToken, containerId);
+
+console.log(`Carousel post published with ID: ${publishedId}`);
 ```
 
 ## Deploying as an Edge Function

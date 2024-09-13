@@ -1,0 +1,11 @@
+{
+  "gpt-context-generator.detectedFileExtensions": [
+    "js",
+    "jsx",
+    "ts",
+    "tsx",
+    "mdx",
+    "json",
+    "md"
+  ]
+}
