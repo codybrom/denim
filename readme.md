@@ -32,13 +32,13 @@ This will add the latest version of Denim to your project's dependencies.
 To import straight from JSR:
 
 ```typescript
-import { ThreadsPostRequest, createThreadsContainer, publishThreadsContainer } from 'jsr:@codybrom/denim@^1.3.0';
+import { ThreadsPostRequest, createThreadsContainer, publishThreadsContainer } from 'jsr:@codybrom/denim';
 ```
 
 ### Basic Usage
 
 ```typescript
-import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim@^1.3.0";
+import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim";
 
 const request: ThreadsPostRequest = {
   userId: "YOUR_USER_ID",
@@ -61,7 +61,7 @@ console.log(`Post published with ID: ${publishedId}`);
 #### Retrieving Publishing Rate Limit
 
 ```typescript
-import { getPublishingLimit } from "jsr:@codybrom/denim@^1.3.0";
+import { getPublishingLimit } from "jsr:@codybrom/denim";
 
 const userId = "YOUR_USER_ID";
 const accessToken = "YOUR_ACCESS_TOKEN";
@@ -144,7 +144,7 @@ const videoRequest: ThreadsPostRequest = {
 #### Carousel Post
 
 ```typescript
-import { createCarouselItem, createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim@^1.0.4";
+import { createCarouselItem, createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim";
 
 // First, create carousel items
 const item1Id = await createCarouselItem({

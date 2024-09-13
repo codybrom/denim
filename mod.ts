@@ -70,7 +70,6 @@ export async function createThreadsContainer(
 
   // Add common optional parameters
   if (request.text) body.append("text", request.text);
-  if (request.altText) body.append("alt_text", request.altText);
   if (request.replyControl) body.append("reply_control", request.replyControl);
   if (request.allowlistedCountryCodes) {
     body.append(
@@ -80,16 +79,29 @@ export async function createThreadsContainer(
   }
 
   // Handle media type specific parameters
-  if (request.mediaType === "VIDEO") {
-    const videoItemId = await createVideoItemContainer(request);
-    body.set("media_type", "CAROUSEL");
-    body.append("children", videoItemId);
-  } else if (request.mediaType === "IMAGE" && request.imageUrl) {
-    body.append("image_url", request.imageUrl);
-  } else if (request.mediaType === "TEXT" && request.linkAttachment) {
-    body.append("link_attachment", request.linkAttachment);
-  } else if (request.mediaType === "CAROUSEL" && request.children) {
-    body.append("children", request.children.join(","));
+  switch (request.mediaType) {
+    case "VIDEO":
+      if (!request.videoUrl)
+        throw new Error("videoUrl is required for VIDEO media type");
+      body.append("video_url", request.videoUrl);
+      if (request.altText) body.append("alt_text", request.altText);
+      break;
+    case "IMAGE":
+      if (!request.imageUrl)
+        throw new Error("imageUrl is required for IMAGE media type");
+      body.append("image_url", request.imageUrl);
+      if (request.altText) body.append("alt_text", request.altText);
+      break;
+    case "TEXT":
+      if (request.linkAttachment)
+        body.append("link_attachment", request.linkAttachment);
+      break;
+    case "CAROUSEL":
+      if (!request.children || request.children.length < 2) {
+        throw new Error("CAROUSEL media type requires at least 2 children");
+      }
+      body.append("children", request.children.join(","));
+      break;
   }
 
   console.log(`Sending request to: ${url}`);
@@ -149,9 +161,6 @@ function validateRequest(request: ThreadsPostRequest): void {
   if (request.mediaType !== "IMAGE" && request.imageUrl) {
     throw new Error("imageUrl can only be used with IMAGE media type");
   }
-  if (request.mediaType !== "VIDEO" && request.videoUrl) {
-    throw new Error("videoUrl can only be used with VIDEO media type");
-  }
   if (request.mediaType !== "TEXT" && request.linkAttachment) {
     throw new Error("linkAttachment can only be used with TEXT media type");
   }
@@ -163,49 +172,6 @@ function validateRequest(request: ThreadsPostRequest): void {
     (!request.children || request.children.length < 2)
   ) {
     throw new Error("CAROUSEL media type requires at least 2 children");
-  }
-}
-
-/**
- * Creates a video item container for Threads.
- * @param request - The ThreadsPostRequest object containing video post details
- * @returns A Promise that resolves to the video item container ID
- * @throws Will throw an error if the API request fails
- */
-async function createVideoItemContainer(
-  request: ThreadsPostRequest
-): Promise<string> {
-  const url = `${THREADS_API_BASE_URL}/${request.userId}/threads`;
-  const body = new URLSearchParams({
-    access_token: request.accessToken,
-    is_carousel_item: "true",
-    media_type: "VIDEO",
-    video_url: request.videoUrl!,
-    ...(request.altText && { alt_text: request.altText }),
-  });
-
-  const response = await fetch(url, {
-    method: "POST",
-    body: body,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-  });
-
-  const responseText = await response.text();
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to create video item container: ${response.statusText}. Details: ${responseText}`
-    );
-  }
-
-  try {
-    const data = JSON.parse(responseText);
-    return data.id;
-  } catch (error) {
-    console.error(`Failed to parse response JSON: ${error}`);
-    throw new Error(`Invalid response from Threads API: ${responseText}`);
   }
 }
 
