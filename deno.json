@@ -1,6 +1,6 @@
 {
     "name": "@codybrom/denim",
-    "version": "1.3.1",
+    "version": "1.3.2",
     "description": "A Deno function for posting to Threads.",
     "entry": "./mod.ts",
     "exports": {
