@@ -1,3 +1,27 @@
+// mod.ts
+import type {
+  ThreadsPostRequest,
+  PublishingLimit,
+  ThreadsPost,
+  ThreadsListResponse,
+  MockThreadsAPI,
+} from "./types.ts";
+export type {
+  ThreadsPostRequest,
+  PublishingLimit,
+  ThreadsPost,
+  ThreadsListResponse,
+};
+
+/**
+ * Retrieves the mock API instance if available.
+ *
+ * @returns The mock API instance or null if not available
+ */
+function getAPI(): MockThreadsAPI | null {
+  return (globalThis as { threadsAPI?: MockThreadsAPI }).threadsAPI || null;
+}
+
 /**
  * @module
  *
@@ -7,34 +31,6 @@
 
 /** The base URL for the Threads API */
 export const THREADS_API_BASE_URL = "https://graph.threads.net/v1.0";
-
-/**
- * Represents a request to post content on Threads.
- */
-export interface ThreadsPostRequest {
-  /** The user ID of the Threads account */
-  userId: string;
-  /** The access token for authentication */
-  accessToken: string;
-  /** The type of media being posted */
-  mediaType: "TEXT" | "IMAGE" | "VIDEO" | "CAROUSEL";
-  /** The text content of the post (optional) */
-  text?: string;
-  /** The URL of the image to be posted (optional, for IMAGE type) */
-  imageUrl?: string;
-  /** The URL of the video to be posted (optional, for VIDEO type) */
-  videoUrl?: string;
-  /** The accessibility text for the image or video (optional) */
-  altText?: string;
-  /** The URL to be attached as a link to the post (optional, for text posts only) */
-  linkAttachment?: string;
-  /** List of country codes where the post should be visible (optional - requires special API access) */
-  allowlistedCountryCodes?: string[];
-  /** Controls who can reply to the post (optional) */
-  replyControl?: "everyone" | "accounts_you_follow" | "mentioned_only";
-  /** Array of carousel item IDs (required for CAROUSEL type, not applicable for other types) */
-  children?: string[];
-}
 
 /**
  * Creates a Threads media container.
@@ -58,65 +54,82 @@ export interface ThreadsPostRequest {
  */
 export async function createThreadsContainer(
   request: ThreadsPostRequest
-): Promise<string> {
-  // Input validation
-  validateRequest(request);
-
-  const url = `${THREADS_API_BASE_URL}/${request.userId}/threads`;
-  const body = new URLSearchParams({
-    access_token: request.accessToken,
-    media_type: request.mediaType,
-  });
-
-  // Add common optional parameters
-  if (request.text) body.append("text", request.text);
-  if (request.altText) body.append("alt_text", request.altText);
-  if (request.replyControl) body.append("reply_control", request.replyControl);
-  if (request.allowlistedCountryCodes) {
-    body.append(
-      "allowlisted_country_codes",
-      request.allowlistedCountryCodes.join(",")
-    );
+): Promise<string | { id: string; permalink: string }> {
+  const api = getAPI();
+  if (api) {
+    // Use mock API
+    return api.createThreadsContainer(request);
   }
-
-  // Handle media type specific parameters
-  if (request.mediaType === "VIDEO") {
-    const videoItemId = await createVideoItemContainer(request);
-    body.set("media_type", "CAROUSEL");
-    body.append("children", videoItemId);
-  } else if (request.mediaType === "IMAGE" && request.imageUrl) {
-    body.append("image_url", request.imageUrl);
-  } else if (request.mediaType === "TEXT" && request.linkAttachment) {
-    body.append("link_attachment", request.linkAttachment);
-  } else if (request.mediaType === "CAROUSEL" && request.children) {
-    body.append("children", request.children.join(","));
-  }
-
-  console.log(`Sending request to: ${url}`);
-  console.log(`Request body: ${body.toString()}`);
-
-  const response = await fetch(url, {
-    method: "POST",
-    body: body,
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  });
-
-  const responseText = await response.text();
-  console.log(`Response status: ${response.status} ${response.statusText}`);
-  console.log(`Response body: ${responseText}`);
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to create Threads container: ${response.statusText}. Details: ${responseText}`
-    );
-  }
-
   try {
+    // Input validation
+    validateRequest(request);
+
+    const url = `${THREADS_API_BASE_URL}/${request.userId}/threads`;
+    const body = new URLSearchParams({
+      access_token: request.accessToken,
+      media_type: request.mediaType,
+    });
+
+    // Add common optional parameters
+    if (request.text) body.append("text", request.text);
+    if (request.altText) body.append("alt_text", request.altText);
+    if (request.replyControl)
+      body.append("reply_control", request.replyControl);
+    if (request.allowlistedCountryCodes) {
+      body.append(
+        "allowlisted_country_codes",
+        request.allowlistedCountryCodes.join(",")
+      );
+    }
+
+    // Handle media type specific parameters
+    if (request.mediaType === "VIDEO" && request.videoUrl) {
+      const videoItemId = await createVideoItemContainer(request);
+      body.set("media_type", "CAROUSEL");
+      body.append("children", videoItemId);
+    } else if (request.mediaType === "IMAGE" && request.imageUrl) {
+      body.append("image_url", request.imageUrl);
+    } else if (request.mediaType === "TEXT" && request.linkAttachment) {
+      body.append("link_attachment", request.linkAttachment);
+    } else if (request.mediaType === "CAROUSEL" && request.children) {
+      body.append("children", request.children.join(","));
+    }
+
+    console.log(`Sending request to: ${url}`);
+    console.log(`Request body: ${body.toString()}`);
+
+    const response = await fetch(url, {
+      method: "POST",
+      body: body,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+
+    const responseText = await response.text();
+
+    console.log(`Response status: ${response.status} ${response.statusText}`);
+    console.log(`Response body: ${responseText}`);
+
+    if (!response.ok) {
+      throw new Error(`Internal Server Error. Details: ${responseText}`);
+    }
+
     const data = JSON.parse(responseText);
-    return data.id;
+
+    // If getPermalink is true, fetch the permalink
+    if (request.getPermalink) {
+      const threadData = await getSingleThread(data.id, request.accessToken);
+      return {
+        id: data.id,
+        permalink: threadData.permalink || "",
+      };
+    } else {
+      return data.id;
+    }
   } catch (error) {
-    console.error(`Failed to parse response JSON: ${error}`);
-    throw new Error(`Invalid response from Threads API: ${responseText}`);
+    // Access error message safely
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown Error";
+    throw new Error(`Failed to create Threads container: ${errorMessage}`);
   }
 }
 
@@ -168,6 +181,7 @@ function validateRequest(request: ThreadsPostRequest): void {
 
 /**
  * Creates a video item container for Threads.
+ *
  * @param request - The ThreadsPostRequest object containing video post details
  * @returns A Promise that resolves to the video item container ID
  * @throws Will throw an error if the API request fails
@@ -242,7 +256,12 @@ export async function createCarouselItem(
   request: Omit<ThreadsPostRequest, "mediaType"> & {
     mediaType: "IMAGE" | "VIDEO";
   }
-): Promise<string> {
+): Promise<string | { id: string }> {
+  const api = getAPI();
+  if (api) {
+    // Use mock API
+    return api.createCarouselItem(request);
+  }
   if (request.mediaType !== "IMAGE" && request.mediaType !== "VIDEO") {
     throw new Error("Carousel items must be either IMAGE or VIDEO type");
   }
@@ -292,6 +311,7 @@ export async function createCarouselItem(
 
 /**
  * Checks the status of a Threads container.
+ *
  * @param containerId - The ID of the container to check
  * @param accessToken - The access token for authentication
  * @returns A Promise that resolves to the container status
@@ -329,62 +349,99 @@ async function checkContainerStatus(
 export async function publishThreadsContainer(
   userId: string,
   accessToken: string,
-  containerId: string
-): Promise<string> {
-  const publishUrl = `${THREADS_API_BASE_URL}/${userId}/threads_publish`;
-  const publishBody = new URLSearchParams({
-    access_token: accessToken,
-    creation_id: containerId,
-  });
-
-  const publishResponse = await fetch(publishUrl, {
-    method: "POST",
-    body: publishBody,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-  });
-
-  if (!publishResponse.ok) {
-    throw new Error(
-      `Failed to publish Threads container: ${publishResponse.statusText}`
+  containerId: string,
+  getPermalink: boolean = false
+): Promise<string | { id: string; permalink: string }> {
+  const api = getAPI();
+  if (api) {
+    // Use mock API
+    return api.publishThreadsContainer(
+      userId,
+      accessToken,
+      containerId,
+      getPermalink
     );
   }
+  try {
+    const publishUrl = `${THREADS_API_BASE_URL}/${userId}/threads_publish`;
+    const publishBody = new URLSearchParams({
+      access_token: accessToken,
+      creation_id: containerId,
+    });
 
-  // Check container status
-  let status = await checkContainerStatus(containerId, accessToken);
-  let attempts = 0;
-  const maxAttempts = 5;
+    const publishResponse = await fetch(publishUrl, {
+      method: "POST",
+      body: publishBody,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
 
-  while (
-    status !== "PUBLISHED" &&
-    status !== "FINISHED" &&
-    attempts < maxAttempts
-  ) {
-    await new Promise((resolve) => setTimeout(resolve, 60000)); // Wait for 1 minute
-    status = await checkContainerStatus(containerId, accessToken);
-    attempts++;
+    if (!publishResponse.ok) {
+      throw new Error(
+        `Failed to publish Threads container: ${publishResponse.statusText}`
+      );
+    }
+
+    const publishData = await publishResponse.json();
+
+    if (getPermalink) {
+      const mediaId = publishData.id;
+      const permalinkUrl = `${THREADS_API_BASE_URL}/${mediaId}?fields=permalink&access_token=${accessToken}`;
+      const permalinkResponse = await fetch(permalinkUrl);
+
+      if (permalinkResponse.ok) {
+        const permalinkData = await permalinkResponse.json();
+        return {
+          id: mediaId,
+          permalink: permalinkData.permalink,
+        };
+      } else {
+        throw new Error("Failed to fetch permalink");
+      }
+    }
+
+    // Check container status
+    let status = await checkContainerStatus(containerId, accessToken);
+    let attempts = 0;
+    const maxAttempts = 5;
+
+    while (
+      status !== "PUBLISHED" &&
+      status !== "FINISHED" &&
+      attempts < maxAttempts
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+      status = await checkContainerStatus(containerId, accessToken);
+      attempts++;
+    }
+
+    if (status === "ERROR") {
+      throw new Error(`Failed to publish container. Error: ${status}`);
+    }
+
+    if (status !== "PUBLISHED" && status !== "FINISHED") {
+      throw new Error(
+        `Container not published after ${maxAttempts} attempts. Current status: ${status}`
+      );
+    }
+
+    return publishData.id;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to publish Threads container: ${error.message}`);
+    }
+    throw error;
   }
-
-  if (status === "ERROR") {
-    throw new Error(`Failed to publish container. Error: ${status}`);
-  }
-
-  if (status !== "PUBLISHED" && status !== "FINISHED") {
-    throw new Error(
-      `Container not published after ${maxAttempts} attempts. Current status: ${status}`
-    );
-  }
-
-  return containerId; // Return the container ID as the published ID
 }
-
 /**
  * Serves HTTP requests to create and publish Threads posts.
  *
  * This function sets up a server that listens for POST requests
  * containing ThreadsPostRequest data. It creates a container and
  * immediately publishes it.
+ *
+ * @throws Will throw an error if the request is invalid or if there's an error during processing
  *
  * @example
  * ```typescript
@@ -393,6 +450,8 @@ export async function publishThreadsContainer(
  * ```
  */
 export function serveRequests() {
+  const api = getAPI();
+
   Deno.serve(async (req) => {
     if (req.method !== "POST") {
       return new Response("Method Not Allowed", { status: 405 });
@@ -416,17 +475,47 @@ export function serveRequests() {
         );
       }
 
-      // Create the Threads container
-      const containerId = await createThreadsContainer(requestData);
+      let containerResult;
+      let publishResult;
 
-      // Immediately attempt to publish the Threads container
-      const publishedId = await publishThreadsContainer(
-        requestData.userId,
-        requestData.accessToken,
-        containerId
-      );
+      if (api) {
+        // Use mock API
+        containerResult = await api.createThreadsContainer(requestData);
+        publishResult = await api.publishThreadsContainer(
+          requestData.userId,
+          requestData.accessToken,
+          typeof containerResult === "string"
+            ? containerResult
+            : containerResult.id,
+          requestData.getPermalink
+        );
+      } else {
+        // Use real API calls
+        containerResult = await createThreadsContainer(requestData);
+        if (typeof containerResult === "string") {
+          publishResult = await publishThreadsContainer(
+            requestData.userId,
+            requestData.accessToken,
+            containerResult,
+            requestData.getPermalink
+          );
+        } else {
+          publishResult = containerResult;
+        }
+      }
 
-      return new Response(JSON.stringify({ success: true, publishedId }), {
+      let responseData;
+      if (typeof publishResult === "string") {
+        responseData = { success: true, publishedId: publishResult };
+      } else {
+        responseData = {
+          success: true,
+          publishedId: publishResult.id,
+          permalink: publishResult.permalink,
+        };
+      }
+
+      return new Response(JSON.stringify(responseData), {
         headers: { "Content-Type": "application/json" },
       });
     } catch (error) {
@@ -462,13 +551,12 @@ export function serveRequests() {
 export async function getPublishingLimit(
   userId: string,
   accessToken: string
-): Promise<{
-  quota_usage: number;
-  config: {
-    quota_total: number;
-    quota_duration: number;
-  };
-}> {
+): Promise<PublishingLimit> {
+  const api = getAPI();
+  if (api) {
+    // Use mock API
+    return api.getPublishingLimit(userId, accessToken);
+  }
   const url = `${THREADS_API_BASE_URL}/${userId}/threads_publishing_limit`;
   const params = new URLSearchParams({
     access_token: accessToken,
@@ -476,15 +564,94 @@ export async function getPublishingLimit(
   });
 
   const response = await fetch(`${url}?${params}`);
-  const data = await response.json();
-
   if (!response.ok) {
-    throw new Error(
-      `Failed to get publishing limit: ${
-        data.error?.message || response.statusText
-      }`
-    );
+    throw new Error(`Failed to get publishing limit: ${response.statusText}`);
   }
 
+  const data = await response.json();
   return data.data[0];
+}
+
+/**
+ * Retrieves a list of all threads created by a user.
+ *
+ * @param userId - The user ID of the Threads account
+ * @param accessToken - The access token for authentication
+ * @param options - Optional parameters for the request
+ * @param options.since - Start date for fetching threads (ISO 8601 format)
+ * @param options.until - End date for fetching threads (ISO 8601 format)
+ * @param options.limit - Maximum number of threads to return
+ * @param options.after - Cursor for pagination (next page)
+ * @param options.before - Cursor for pagination (previous page)
+ * @returns A Promise that resolves to the ThreadsListResponse
+ * @throws Will throw an error if the API request fails
+ */
+export async function getThreadsList(
+  userId: string,
+  accessToken: string,
+  options?: {
+    since?: string;
+    until?: string;
+    limit?: number;
+    after?: string;
+    before?: string;
+  }
+): Promise<ThreadsListResponse> {
+  const api = getAPI();
+  if (api) {
+    // Use mock API
+    return api.getThreadsList(userId, accessToken, options);
+  }
+  const fields =
+    "id,media_product_type,media_type,media_url,permalink,owner,username,text,timestamp,shortcode,thumbnail_url,children,is_quote_post";
+  const url = new URL(`${THREADS_API_BASE_URL}/${userId}/threads`);
+  url.searchParams.append("fields", fields);
+  url.searchParams.append("access_token", accessToken);
+
+  if (options) {
+    if (options.since) url.searchParams.append("since", options.since);
+    if (options.until) url.searchParams.append("until", options.until);
+    if (options.limit)
+      url.searchParams.append("limit", options.limit.toString());
+    if (options.after) url.searchParams.append("after", options.after);
+    if (options.before) url.searchParams.append("before", options.before);
+  }
+
+  const response = await fetch(url.toString());
+  if (!response.ok) {
+    throw new Error(`Failed to retrieve threads list: ${response.statusText}`);
+  }
+
+  return await response.json();
+}
+
+/**
+ * Retrieves a single Threads media object.
+ *
+ * @param mediaId - The ID of the Threads media object
+ * @param accessToken - The access token for authentication
+ * @returns A Promise that resolves to the ThreadsPost object
+ * @throws Will throw an error if the API request fails
+ */
+export async function getSingleThread(
+  mediaId: string,
+  accessToken: string
+): Promise<ThreadsPost> {
+  const api = getAPI();
+  if (api) {
+    // Use mock API
+    return api.getSingleThread(mediaId, accessToken);
+  }
+  const fields =
+    "id,media_product_type,media_type,media_url,permalink,owner,username,text,timestamp,shortcode,thumbnail_url,children,is_quote_post";
+  const url = new URL(`${THREADS_API_BASE_URL}/${mediaId}`);
+  url.searchParams.append("fields", fields);
+  url.searchParams.append("access_token", accessToken);
+
+  const response = await fetch(url.toString());
+  if (!response.ok) {
+    throw new Error(`Failed to retrieve thread: ${response.statusText}`);
+  }
+
+  return await response.json();
 }

@@ -6,9 +6,11 @@ import {
   publishThreadsContainer,
   createCarouselItem,
   getPublishingLimit,
-} from "jsr:@codybrom/denim@1.3.0";
+} from "jsr:@codybrom/denim@1.3.5";
 
-async function postToThreads(request: ThreadsPostRequest): Promise<string> {
+async function postToThreads(
+  request: ThreadsPostRequest
+): Promise<{ id: string; permalink: string }> {
   try {
     // Check rate limit
     const rateLimit = await getPublishingLimit(
@@ -23,17 +25,40 @@ async function postToThreads(request: ThreadsPostRequest): Promise<string> {
       delete request.imageUrl;
     }
 
-    const containerId = await createThreadsContainer(request);
-    console.log(`Container created with ID: ${containerId}`);
+    const containerResult = await createThreadsContainer(request);
+    console.log(
+      `Container created with ID: ${
+        typeof containerResult === "string"
+          ? containerResult
+          : containerResult.id
+      }`
+    );
 
-    const publishedId = await publishThreadsContainer(
+    const publishedResult = await publishThreadsContainer(
       request.userId,
       request.accessToken,
-      containerId
+      typeof containerResult === "string"
+        ? containerResult
+        : containerResult.id,
+      true // Get permalink
     );
-    console.log(`Post published with ID: ${publishedId}`);
 
-    return publishedId;
+    console.log(
+      `Post published with ID: ${
+        typeof publishedResult === "string"
+          ? publishedResult
+          : publishedResult.id
+      }`
+    );
+
+    if (typeof publishedResult === "string") {
+      return { id: publishedResult, permalink: "" };
+    }
+
+    return {
+      id: publishedResult.id,
+      permalink: publishedResult.permalink,
+    };
   } catch (error) {
     console.error("Error posting to Threads:", error);
     throw error;
@@ -102,7 +127,6 @@ Deno.serve(async (req: Request) => {
             videoUrl: body.videoUrl,
             altText: body.altText,
             linkAttachment: body.linkAttachment,
-            allowlistedCountryCodes: body.allowlistedCountryCodes,
             replyControl: body.replyControl,
             children: body.children,
           };
@@ -117,14 +141,23 @@ Deno.serve(async (req: Request) => {
                 videoUrl: item.videoUrl,
                 altText: item.altText,
               });
-              postRequest.children.push(itemId);
+              postRequest.children.push(
+                typeof itemId === "string" ? itemId : itemId.id
+              );
             }
           }
-          const publishedId = await postToThreads(postRequest);
-          return new Response(JSON.stringify({ success: true, publishedId }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          const publishedResult = await postToThreads(postRequest);
+          return new Response(
+            JSON.stringify({
+              success: true,
+              id: publishedResult.id,
+              permalink: publishedResult.permalink,
+            }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
         } catch (error) {
           console.error("Error processing request:", error);
           return new Response(
@@ -169,10 +202,11 @@ Deno.serve(async (req: Request) => {
       "userId": "YOUR_USER_ID",
       "accessToken": "YOUR_ACCESS_TOKEN",
       "mediaType": "TEXT",
-      "text": "Hello from Denim!"
+      "text": "Hello from Denim!",
+      "linkAttachment": "https://example.com"
     }'
 
-  # Post an image Thread
+  # Post an image Thread with alt text
   curl -X POST <YOUR_FUNCTION_URI>/post \
     -H "Content-Type: application/json" \
     -d '{
@@ -180,10 +214,11 @@ Deno.serve(async (req: Request) => {
       "accessToken": "YOUR_ACCESS_TOKEN",
       "mediaType": "IMAGE",
       "text": "Check out this image I posted with Denim!",
-      "imageUrl": "https://example.com/image.jpg"
+      "imageUrl": "https://example.com/image.jpg",
+      "altText": "A beautiful sunset over the ocean"
     }'
   
-  # Post a video Thread
+  # Post a video Thread with reply control
   curl -X POST <YOUR_FUNCTION_URI>/post \
     -H "Content-Type: application/json" \
     -d '{
@@ -191,7 +226,8 @@ Deno.serve(async (req: Request) => {
       "accessToken": "YOUR_ACCESS_TOKEN",
       "mediaType": "VIDEO",
       "text": "Watch this video I posted with Denim!",
-      "videoUrl": "https://example.com/video.mp4"
+      "videoUrl": "https://example.com/video.mp4",
+      "replyControl": "mentioned_only"
     }'
   
   # Post a carousel Thread
