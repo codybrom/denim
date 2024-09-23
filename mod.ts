@@ -114,17 +114,9 @@ export async function createThreadsContainer(
     }
 
     const data = JSON.parse(responseText);
+    console.log(`Created container: ${data}`);
 
-    // If getPermalink is true, fetch the permalink
-    if (request.getPermalink) {
-      const threadData = await getSingleThread(data.id, request.accessToken);
-      return {
-        id: data.id,
-        permalink: threadData.permalink || "",
-      };
-    } else {
-      return data.id;
-    }
+    return data.id;
   } catch (error) {
     // Access error message safely
     const errorMessage =
@@ -385,22 +377,6 @@ export async function publishThreadsContainer(
 
     const publishData = await publishResponse.json();
 
-    if (getPermalink) {
-      const mediaId = publishData.id;
-      const permalinkUrl = `${THREADS_API_BASE_URL}/${mediaId}?fields=permalink&access_token=${accessToken}`;
-      const permalinkResponse = await fetch(permalinkUrl);
-
-      if (permalinkResponse.ok) {
-        const permalinkData = await permalinkResponse.json();
-        return {
-          id: mediaId,
-          permalink: permalinkData.permalink,
-        };
-      } else {
-        throw new Error("Failed to fetch permalink");
-      }
-    }
-
     // Check container status
     let status = await checkContainerStatus(containerId, accessToken);
     let attempts = 0;
@@ -426,6 +402,14 @@ export async function publishThreadsContainer(
       );
     }
 
+    if (getPermalink) {
+      const threadData = await getSingleThread(publishData.id, accessToken);
+      return {
+        id: publishData.id,
+        permalink: threadData.permalink || "",
+      };
+    }
+
     return publishData.id;
   } catch (error) {
     if (error instanceof Error) {
@@ -434,6 +418,7 @@ export async function publishThreadsContainer(
     throw error;
   }
 }
+
 /**
  * Serves HTTP requests to create and publish Threads posts.
  *

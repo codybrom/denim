@@ -250,6 +250,57 @@ Deno.test("Threads API", async (t) => {
       );
       teardownMockAPI();
     });
+
+    await t.step("should return permalink when requested", async () => {
+      setupMockAPI();
+      const userId = "12345";
+      const accessToken = "token";
+      const containerId = await createThreadsContainer({
+        userId,
+        accessToken,
+        mediaType: "TEXT",
+        text: "Test post with permalink",
+      });
+
+      const result = await publishThreadsContainer(
+        userId,
+        accessToken,
+        typeof containerId === "string" ? containerId : containerId.id,
+        true // Request permalink
+      );
+
+      if (typeof result === "string") {
+        throw new Error("Expected an object with permalink, but got a string");
+      } else {
+        assertEquals(typeof result, "object");
+        assertEquals(typeof result.id, "string");
+        assertEquals(typeof result.permalink, "string");
+        assertEquals(result.permalink.startsWith("https://"), true);
+      }
+      teardownMockAPI();
+    });
+
+    await t.step("should not return permalink when not requested", async () => {
+      setupMockAPI();
+      const userId = "12345";
+      const accessToken = "token";
+      const containerId = await createThreadsContainer({
+        userId,
+        accessToken,
+        mediaType: "TEXT",
+        text: "Test post without permalink",
+      });
+
+      const result = await publishThreadsContainer(
+        userId,
+        accessToken,
+        typeof containerId === "string" ? containerId : containerId.id,
+        false // Don't request permalink
+      );
+
+      assertEquals(typeof result, "string");
+      teardownMockAPI();
+    });
   });
 
   await t.step("createCarouselItem", async (t) => {
