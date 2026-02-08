@@ -9,6 +9,7 @@
 // ─── Types ───────────────────────────────────────────────────────────────────
 import type {
 	AuthCodeResponse,
+	CursorPaginationOptions,
 	DebugTokenInfo,
 	GifAttachment,
 	InsightValue,
@@ -30,7 +31,6 @@ import type {
 	TextAttachment,
 	TextAttachmentInput,
 	TextEntity,
-	TextStylingInfo,
 	ThreadsContainer,
 	ThreadsListResponse,
 	ThreadsLocation,
@@ -50,6 +50,7 @@ import type {
 
 export type {
 	AuthCodeResponse,
+	CursorPaginationOptions,
 	DebugTokenInfo,
 	GifAttachment,
 	InsightValue,
@@ -71,7 +72,6 @@ export type {
 	TextAttachment,
 	TextAttachmentInput,
 	TextEntity,
-	TextStylingInfo,
 	ThreadsContainer,
 	ThreadsListResponse,
 	ThreadsLocation,

@@ -2,12 +2,9 @@ import { REPLY_FIELDS, THREADS_API_BASE_URL } from "../constants.ts";
 import type { PaginationOptions, ThreadsListResponse } from "../types.ts";
 import { getAPI } from "../utils/getAPI.ts";
 
-const DEFAULT_FIELDS = [
-	...REPLY_FIELDS,
-	"alt_text",
-	"link_attachment_url",
-	"poll_attachment",
-];
+const DEFAULT_FIELDS = REPLY_FIELDS.filter(
+	(f) => f !== "hide_status" && f !== "topic_tag",
+);
 
 /**
  * Retrieves a list of all replies created by a user.

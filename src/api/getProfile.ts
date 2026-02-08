@@ -9,7 +9,7 @@ const DEFAULT_FIELDS = [
 	"threads_profile_picture_url",
 	"threads_biography",
 	"is_verified",
-	"is_eligible_for_geo_gating",
+	"recently_searched_keywords",
 ];
 
 /**

@@ -1044,7 +1044,6 @@ Deno.test("Denim API Tests", async (t) => {
 			setupMockAPI();
 			const result = await debugToken("access_token", "input_token");
 			assertEquals(result.data.is_valid, true);
-			assertEquals(typeof result.data.app_id, "string");
 			assertEquals(Array.isArray(result.data.scopes), true);
 			teardownMockAPI();
 		});

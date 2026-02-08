@@ -11,6 +11,7 @@ const DEFAULT_FIELDS = [
 	"follower_count",
 	"likes_count",
 	"quotes_count",
+	"replies_count",
 	"reposts_count",
 	"views_count",
 ];

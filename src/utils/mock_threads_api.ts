@@ -1,5 +1,6 @@
 import type {
 	AuthCodeResponse,
+	CursorPaginationOptions,
 	DebugTokenInfo,
 	KeywordSearchOptions,
 	LocationSearchOptions,
@@ -312,11 +313,11 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 	getReplies(
 		_mediaId: string,
 		_accessToken: string,
-		options?: PaginationOptions,
+		_options?: CursorPaginationOptions,
 		_fields?: string[],
 	): Promise<ThreadsListResponse> {
 		return Promise.resolve({
-			data: Array.from(this.posts.values()).slice(0, options?.limit || 25),
+			data: Array.from(this.posts.values()).slice(0, 25),
 			paging: {
 				cursors: { before: "BEFORE_CURSOR", after: "AFTER_CURSOR" },
 			},
@@ -326,11 +327,11 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 	getConversation(
 		_mediaId: string,
 		_accessToken: string,
-		options?: PaginationOptions,
+		_options?: CursorPaginationOptions,
 		_fields?: string[],
 	): Promise<ThreadsListResponse> {
 		return Promise.resolve({
-			data: Array.from(this.posts.values()).slice(0, options?.limit || 25),
+			data: Array.from(this.posts.values()).slice(0, 25),
 			paging: {
 				cursors: { before: "BEFORE_CURSOR", after: "AFTER_CURSOR" },
 			},
@@ -511,7 +512,6 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		}
 		return Promise.resolve({
 			data: {
-				app_id: "123456",
 				type: "USER",
 				application: "Test App",
 				is_valid: true,

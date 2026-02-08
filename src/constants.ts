@@ -40,8 +40,6 @@ export const USER_THREADS_FIELDS = [
 	"text_attachment",
 	"ghost_post_status",
 	"ghost_post_expiration_timestamp",
-	"location_id",
-	"location",
 ];
 
 /** Fields for single thread retrieval (GET /{media-id}) */
@@ -66,7 +64,6 @@ export const REPLY_FIELDS = [
 	"quoted_post",
 	"reposted_post",
 	"gif_url",
-	"poll_attachment",
 	"topic_tag",
 ];
 

@@ -1,5 +1,5 @@
 import { REPLY_FIELDS, THREADS_API_BASE_URL } from "../constants.ts";
-import type { PaginationOptions, ThreadsListResponse } from "../types.ts";
+import type { CursorPaginationOptions, ThreadsListResponse } from "../types.ts";
 import { getAPI } from "../utils/getAPI.ts";
 
 /**
@@ -16,7 +16,7 @@ import { getAPI } from "../utils/getAPI.ts";
 export async function getReplies(
 	mediaId: string,
 	accessToken: string,
-	options?: PaginationOptions,
+	options?: CursorPaginationOptions,
 	fields?: string[],
 	reverse?: boolean,
 ): Promise<ThreadsListResponse> {
@@ -35,11 +35,6 @@ export async function getReplies(
 	}
 
 	if (options) {
-		if (options.since) url.searchParams.append("since", String(options.since));
-		if (options.until) url.searchParams.append("until", String(options.until));
-		if (options.limit) {
-			url.searchParams.append("limit", options.limit.toString());
-		}
 		if (options.after) url.searchParams.append("after", options.after);
 		if (options.before) url.searchParams.append("before", options.before);
 	}

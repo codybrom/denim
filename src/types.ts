@@ -154,6 +154,17 @@ export interface PaginationOptions {
 	after?: string;
 }
 
+/**
+ * Cursor-based pagination options for endpoints that only support before/after.
+ * Used by media-level reply and conversation endpoints.
+ */
+export interface CursorPaginationOptions {
+	/** Cursor for previous page */
+	before?: string;
+	/** Cursor for next page */
+	after?: string;
+}
+
 // ─── Response Types (snake_case — matching API reality) ──────────────────────
 
 /**
@@ -191,17 +202,7 @@ export interface TextAttachment {
 	/** Attached link URL */
 	link_attachment_url?: string;
 	/** Styled text with formatting info */
-	text_with_styling_info?: TextStylingInfo;
-}
-
-/**
- * Text styling information.
- */
-export interface TextStylingInfo {
-	/** The full text content */
-	text?: string;
-	/** Styling ranges */
-	ranges?: Array<{
+	text_with_styling_info?: Array<{
 		/** Character offset */
 		offset: number;
 		/** Length of styled range */
@@ -428,6 +429,8 @@ export interface PublicProfile {
 	likes_count?: number;
 	/** Quotes count (past 7 days) */
 	quotes_count?: number;
+	/** Replies count (past 7 days) */
+	replies_count?: number;
 	/** Reposts count (past 7 days) */
 	reposts_count?: number;
 	/** Views count (past 7 days) */
@@ -510,8 +513,8 @@ export interface UserInsightsOptions {
 	since?: number;
 	/** End of the time range (Unix timestamp, required for time series) */
 	until?: number;
-	/** Breakdown dimension (e.g., "country", "city", "age", "gender") */
-	breakdown?: string;
+	/** Breakdown dimension */
+	breakdown?: "country" | "city" | "age" | "gender";
 }
 
 // ─── Search Types ────────────────────────────────────────────────────────────
@@ -574,8 +577,6 @@ export interface TokenResponse {
 export interface DebugTokenInfo {
 	/** Token data */
 	data: {
-		/** App ID */
-		app_id?: string;
 		/** Token type (e.g., "USER") */
 		type?: string;
 		/** Application name */
@@ -613,10 +614,6 @@ export interface OEmbedResponse {
 	version?: string;
 	/** Width of the embed */
 	width?: number;
-	/** Author name */
-	author_name?: string;
-	/** Author URL */
-	author_url?: string;
 }
 
 // ─── Webhook Types ───────────────────────────────────────────────────────────
@@ -835,14 +832,14 @@ export interface MockThreadsAPI {
 	getReplies(
 		mediaId: string,
 		accessToken: string,
-		options?: PaginationOptions,
+		options?: CursorPaginationOptions,
 		fields?: string[],
 	): Promise<ThreadsListResponse>;
 
 	getConversation(
 		mediaId: string,
 		accessToken: string,
-		options?: PaginationOptions,
+		options?: CursorPaginationOptions,
 		fields?: string[],
 	): Promise<ThreadsListResponse>;
 
