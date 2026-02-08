@@ -27,6 +27,11 @@ and this project adheres to
 - Optional `fields` parameter on retrieval functions
 - Validation for new post parameters
 
+### Removed
+
+- `serveRequests()` edge function handler and `handleRequest` server
+- `THREADS_API_BASE_URL` constant from public exports
+
 ## [1.3.6] - 2024-09-23
 
 ### Fixed
