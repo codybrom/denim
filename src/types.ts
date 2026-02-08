@@ -5,7 +5,21 @@
 /**
  * Represents the types of media that can be posted on Threads.
  */
+/**
+ * Media types used when creating posts.
+ */
 export type MediaType = "TEXT" | "IMAGE" | "VIDEO" | "CAROUSEL" | "GIF";
+
+/**
+ * All media type values that can appear in API responses.
+ * Responses use TEXT_POST (not TEXT) and CAROUSEL_ALBUM (not CAROUSEL).
+ */
+export type ResponseMediaType =
+	| MediaType
+	| "TEXT_POST"
+	| "CAROUSEL_ALBUM"
+	| "REPOST_FACADE"
+	| "AUDIO";
 
 /**
  * Represents the options for controlling who can reply to a post.
@@ -53,8 +67,12 @@ export interface TextAttachmentInput {
 	plaintext: string;
 	/** Optional URL to attach */
 	link_attachment_url?: string;
-	/** Optional styled text content */
-	text_with_styling_info?: string;
+	/** Optional styled text with formatting info */
+	text_with_styling_info?: Array<{
+		offset: number;
+		length: number;
+		styling_info: string[];
+	}>;
 }
 
 /**
@@ -141,22 +159,26 @@ export interface PaginationOptions {
  * Poll attachment as returned by the API.
  */
 export interface PollAttachment {
-	/** Poll ID */
-	id: string;
-	/** The poll question/text */
-	question?: string;
-	/** Poll options with vote data */
-	options: Array<{
-		id: string;
-		text: string;
-		vote_count?: number;
-	}>;
+	/** First poll option text */
+	option_a?: string;
+	/** Second poll option text */
+	option_b?: string;
+	/** Third poll option text */
+	option_c?: string;
+	/** Fourth poll option text */
+	option_d?: string;
+	/** Percentage of votes for option A (0-1) */
+	option_a_votes_percentage?: number;
+	/** Percentage of votes for option B (0-1) */
+	option_b_votes_percentage?: number;
+	/** Percentage of votes for option C (0-1) */
+	option_c_votes_percentage?: number;
+	/** Percentage of votes for option D (0-1) */
+	option_d_votes_percentage?: number;
 	/** Total number of votes */
 	total_votes?: number;
-	/** Voting status */
-	voting_status?: string;
-	/** Expiration time (ISO 8601) */
-	expiration?: string;
+	/** Timestamp when the poll expires (ISO 8601) */
+	expiration_timestamp?: string;
 }
 
 /**
@@ -220,7 +242,7 @@ export interface ThreadsPost {
 	/** Type of product where the media is published (e.g., "THREADS") */
 	media_product_type?: string;
 	/** Type of media */
-	media_type?: MediaType;
+	media_type?: ResponseMediaType;
 	/** URL of the media content */
 	media_url?: string;
 	/** Permanent link to the post */
@@ -256,7 +278,13 @@ export interface ThreadsPost {
 	/** Information about the post being replied to */
 	replied_to?: { id: string };
 	/** Visibility status of the post */
-	hide_status?: "VISIBLE" | "HIDDEN";
+	hide_status?:
+		| "NOT_HUSHED"
+		| "UNHUSHED"
+		| "HIDDEN"
+		| "COVERED"
+		| "BLOCKED"
+		| "RESTRICTED";
 	/** Controls who can reply to the post */
 	reply_audience?: ReplyControl;
 	/** The quoted post (for quote posts) */
@@ -283,6 +311,12 @@ export interface ThreadsPost {
 	is_verified?: boolean;
 	/** URL of the user's profile picture */
 	profile_picture_url?: string;
+	/** Ghost post status */
+	ghost_post_status?: "ACTIVE" | "ARCHIVED";
+	/** Ghost post expiration timestamp (ISO 8601) */
+	ghost_post_expiration_timestamp?: string;
+	/** List of country codes where the post is visible */
+	allowlisted_country_codes?: string[];
 }
 
 /**
@@ -366,7 +400,7 @@ export interface ThreadsProfile {
 	/** Whether the user is verified */
 	is_verified?: boolean;
 	/** Recently searched keywords */
-	recently_searched_keywords?: string[];
+	recently_searched_keywords?: Array<{ query: string; timestamp: number }>;
 	/** Whether the user is eligible for geo-gating */
 	is_eligible_for_geo_gating?: boolean;
 }
@@ -382,13 +416,23 @@ export interface PublicProfile {
 	/** Display name */
 	name?: string;
 	/** Profile picture URL */
-	threads_profile_picture_url?: string;
+	profile_picture_url?: string;
 	/** Biography */
-	threads_biography?: string;
+	biography?: string;
 	/** Whether the user is verified */
 	is_verified?: boolean;
 	/** Follower count */
 	follower_count?: number;
+	/** Likes count (past 7 days) */
+	likes_count?: number;
+	/** Quotes count (past 7 days) */
+	quotes_count?: number;
+	/** Reposts count (past 7 days) */
+	reposts_count?: number;
+	/** Views count (past 7 days) */
+	views_count?: number;
+	/** Replies count (past 7 days) */
+	replies_count?: number;
 }
 
 // ─── Insights Types ──────────────────────────────────────────────────────────
@@ -447,6 +491,8 @@ export interface UserInsight {
 	id: string;
 	/** Total value (for lifetime metrics) */
 	total_value?: { value: number | Record<string, number> };
+	/** Link total values (for clicks metric) */
+	link_total_values?: Array<{ value: number; link_url: string }>;
 }
 
 /**
@@ -477,10 +523,10 @@ export interface UserInsightsOptions {
 export interface KeywordSearchOptions extends PaginationOptions {
 	/** The search query string (required) */
 	q: string;
-	/** Type of search (default: "keyword") */
-	search_type?: "keyword" | "hashtag";
-	/** Search mode */
-	search_mode?: "top" | "recent";
+	/** Search behavior: TOP (popular) or RECENT (chronological) */
+	search_type?: "TOP" | "RECENT";
+	/** Search mode: KEYWORD (default) or TAG (topic tag search) */
+	search_mode?: "KEYWORD" | "TAG";
 	/** Filter by media type */
 	media_type?: "TEXT" | "IMAGE" | "VIDEO" | "CAROUSEL";
 	/** Filter by author username */
@@ -492,15 +538,11 @@ export interface KeywordSearchOptions extends PaginationOptions {
  */
 export interface LocationSearchOptions {
 	/** Search query for location name */
-	q?: string;
-	/** Latitude for proximity search */
+	query?: string;
+	/** Latitude for proximity search (must be used with longitude) */
 	latitude?: number;
-	/** Longitude for proximity search */
+	/** Longitude for proximity search (must be used with latitude) */
 	longitude?: number;
-	/** Search radius in meters */
-	distance?: number;
-	/** Maximum results */
-	limit?: number;
 }
 
 // ─── Token Types ─────────────────────────────────────────────────────────────
@@ -757,7 +799,7 @@ export interface MockThreadsAPI {
 	deleteThread(
 		mediaId: string,
 		accessToken: string,
-	): Promise<{ success: boolean }>;
+	): Promise<{ success: boolean; deleted_id?: string }>;
 
 	getProfile(
 		userId: string,

@@ -12,7 +12,7 @@ import { getAPI } from "../utils/getAPI.ts";
 export async function deleteThread(
 	mediaId: string,
 	accessToken: string,
-): Promise<{ success: boolean }> {
+): Promise<{ success: boolean; deleted_id?: string }> {
 	const api = getAPI();
 	if (api) {
 		return api.deleteThread(mediaId, accessToken);

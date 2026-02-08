@@ -24,7 +24,10 @@ and this project adheres to
   list)
 - 11 new post options: polls, GIFs, ghost posts, spoilers, text attachments,
   replies, quotes, topic tags, location tags
-- Optional `fields` parameter on retrieval functions
+- Optional `fields` parameter on retrieval, search, and profile lookup functions
+- `reverse` parameter on `getReplies()` and `getConversation()`
+- `ResponseMediaType` for response-only media type values (`TEXT_POST`,
+  `CAROUSEL_ALBUM`, `REPOST_FACADE`, `AUDIO`)
 - Validation for new post parameters
 
 ### Removed

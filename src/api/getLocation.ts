@@ -1,17 +1,6 @@
-import { THREADS_API_BASE_URL } from "../constants.ts";
+import { LOCATION_FIELDS, THREADS_API_BASE_URL } from "../constants.ts";
 import type { ThreadsLocation } from "../types.ts";
 import { getAPI } from "../utils/getAPI.ts";
-
-const DEFAULT_FIELDS = [
-	"id",
-	"name",
-	"address",
-	"city",
-	"country",
-	"latitude",
-	"longitude",
-	"postal_code",
-];
 
 /**
  * Retrieves information about a specific location.
@@ -32,7 +21,7 @@ export async function getLocation(
 		return api.getLocation(locationId, accessToken, fields);
 	}
 
-	const fieldList = (fields ?? DEFAULT_FIELDS).join(",");
+	const fieldList = (fields ?? LOCATION_FIELDS).join(",");
 	const url = new URL(`${THREADS_API_BASE_URL}/${locationId}`);
 	url.searchParams.append("fields", fieldList);
 	url.searchParams.append("access_token", accessToken);

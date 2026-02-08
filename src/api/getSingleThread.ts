@@ -1,43 +1,6 @@
-import { THREADS_API_BASE_URL } from "../constants.ts";
+import { SINGLE_THREAD_FIELDS, THREADS_API_BASE_URL } from "../constants.ts";
 import type { ThreadsPost } from "../types.ts";
 import { getAPI } from "../utils/getAPI.ts";
-
-const DEFAULT_FIELDS = [
-	"id",
-	"media_product_type",
-	"media_type",
-	"media_url",
-	"permalink",
-	"owner",
-	"username",
-	"text",
-	"timestamp",
-	"shortcode",
-	"thumbnail_url",
-	"children",
-	"is_quote_post",
-	"alt_text",
-	"link_attachment_url",
-	"has_replies",
-	"is_reply",
-	"is_reply_owned_by_me",
-	"root_post",
-	"replied_to",
-	"hide_status",
-	"reply_audience",
-	"quoted_post",
-	"reposted_post",
-	"gif_url",
-	"poll_attachment",
-	"topic_tag",
-	"is_spoiler_media",
-	"text_entities",
-	"text_attachment",
-	"location_id",
-	"location",
-	"is_verified",
-	"profile_picture_url",
-];
 
 /**
  * Retrieves a single Threads media object.
@@ -58,7 +21,7 @@ export async function getSingleThread(
 		// Use mock API
 		return api.getSingleThread(mediaId, accessToken, fields);
 	}
-	const fieldList = (fields ?? DEFAULT_FIELDS).join(",");
+	const fieldList = (fields ?? SINGLE_THREAD_FIELDS).join(",");
 	const url = new URL(`${THREADS_API_BASE_URL}/${mediaId}`);
 	url.searchParams.append("fields", fieldList);
 	url.searchParams.append("access_token", accessToken);

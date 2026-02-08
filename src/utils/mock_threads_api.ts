@@ -208,7 +208,7 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 	deleteThread(
 		mediaId: string,
 		_accessToken: string,
-	): Promise<{ success: boolean }> {
+	): Promise<{ success: boolean; deleted_id?: string }> {
 		if (this.errorMode) {
 			return Promise.reject(new Error("Failed to delete thread"));
 		}
@@ -217,7 +217,7 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 			return Promise.reject(new Error("Thread not found"));
 		}
 		this.posts.delete(mediaId);
-		return Promise.resolve({ success: true });
+		return Promise.resolve({ success: true, deleted_id: mediaId });
 	}
 
 	getProfile(
@@ -252,8 +252,8 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 			id: user.id,
 			username: user.username,
 			name: user.name,
-			threads_profile_picture_url: user.threads_profile_picture_url,
-			threads_biography: user.threads_biography,
+			profile_picture_url: user.threads_profile_picture_url,
+			biography: user.threads_biography,
 			is_verified: user.is_verified,
 		});
 	}

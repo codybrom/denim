@@ -1,31 +1,12 @@
-import { THREADS_API_BASE_URL } from "../constants.ts";
+import { REPLY_FIELDS, THREADS_API_BASE_URL } from "../constants.ts";
 import type { PaginationOptions, ThreadsListResponse } from "../types.ts";
 import { getAPI } from "../utils/getAPI.ts";
 
 const DEFAULT_FIELDS = [
-	"id",
-	"media_product_type",
-	"media_type",
-	"media_url",
-	"permalink",
-	"username",
-	"text",
-	"timestamp",
-	"shortcode",
-	"thumbnail_url",
-	"children",
-	"is_quote_post",
-	"has_replies",
-	"root_post",
-	"replied_to",
-	"is_reply",
-	"is_reply_owned_by_me",
-	"reply_audience",
-	"quoted_post",
-	"reposted_post",
-	"gif_url",
-	"is_verified",
-	"profile_picture_url",
+	...REPLY_FIELDS,
+	"alt_text",
+	"link_attachment_url",
+	"poll_attachment",
 ];
 
 /**

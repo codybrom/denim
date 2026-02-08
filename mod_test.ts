@@ -941,7 +941,7 @@ Deno.test("Denim API Tests", async (t) => {
 		setupMockAPI();
 		const result = await searchKeyword("token", {
 			q: "test query",
-			search_type: "keyword",
+			search_type: "TOP",
 		});
 		assertEquals(Array.isArray(result.data), true);
 		teardownMockAPI();
@@ -952,7 +952,7 @@ Deno.test("Denim API Tests", async (t) => {
 	await t.step("searchLocations", async () => {
 		setupMockAPI();
 		const result = await searchLocations("token", {
-			q: "San Francisco",
+			query: "San Francisco",
 		});
 		assertEquals(Array.isArray(result.data), true);
 		assertEquals(result.data.length > 0, true);

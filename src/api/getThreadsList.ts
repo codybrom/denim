@@ -1,34 +1,6 @@
-import { THREADS_API_BASE_URL } from "../constants.ts";
+import { THREADS_API_BASE_URL, USER_THREADS_FIELDS } from "../constants.ts";
 import type { PaginationOptions, ThreadsListResponse } from "../types.ts";
 import { getAPI } from "../utils/getAPI.ts";
-
-const DEFAULT_FIELDS = [
-	"id",
-	"media_product_type",
-	"media_type",
-	"media_url",
-	"permalink",
-	"owner",
-	"username",
-	"text",
-	"timestamp",
-	"shortcode",
-	"thumbnail_url",
-	"children",
-	"is_quote_post",
-	"alt_text",
-	"link_attachment_url",
-	"has_replies",
-	"reply_audience",
-	"quoted_post",
-	"reposted_post",
-	"gif_url",
-	"is_spoiler_media",
-	"text_entities",
-	"text_attachment",
-	"is_verified",
-	"profile_picture_url",
-];
 
 /**
  * Retrieves a list of all threads created by a user.
@@ -51,7 +23,7 @@ export async function getThreadsList(
 		// Use mock API
 		return api.getThreadsList(userId, accessToken, options, fields);
 	}
-	const fieldList = (fields ?? DEFAULT_FIELDS).join(",");
+	const fieldList = (fields ?? USER_THREADS_FIELDS).join(",");
 	const url = new URL(`${THREADS_API_BASE_URL}/${userId}/threads`);
 	url.searchParams.append("fields", fieldList);
 	url.searchParams.append("access_token", accessToken);

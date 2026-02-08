@@ -1,28 +1,6 @@
-import { THREADS_API_BASE_URL } from "../constants.ts";
+import { REPLY_FIELDS, THREADS_API_BASE_URL } from "../constants.ts";
 import type { PaginationOptions, ThreadsListResponse } from "../types.ts";
 import { getAPI } from "../utils/getAPI.ts";
-
-const DEFAULT_FIELDS = [
-	"id",
-	"media_product_type",
-	"media_type",
-	"media_url",
-	"permalink",
-	"username",
-	"text",
-	"timestamp",
-	"shortcode",
-	"thumbnail_url",
-	"children",
-	"is_quote_post",
-	"has_replies",
-	"root_post",
-	"replied_to",
-	"is_reply",
-	"hide_status",
-	"is_verified",
-	"profile_picture_url",
-];
 
 /**
  * Retrieves replies to a specific Threads media object.
@@ -31,6 +9,7 @@ const DEFAULT_FIELDS = [
  * @param accessToken - The access token for authentication
  * @param options - Optional pagination parameters
  * @param fields - Optional array of fields to return
+ * @param reverse - Optional boolean to sort in reverse chronological order (default: true)
  * @returns A Promise that resolves to the ThreadsListResponse
  * @throws Will throw an error if the API request fails
  */
@@ -39,16 +18,21 @@ export async function getReplies(
 	accessToken: string,
 	options?: PaginationOptions,
 	fields?: string[],
+	reverse?: boolean,
 ): Promise<ThreadsListResponse> {
 	const api = getAPI();
 	if (api) {
 		return api.getReplies(mediaId, accessToken, options, fields);
 	}
 
-	const fieldList = (fields ?? DEFAULT_FIELDS).join(",");
+	const fieldList = (fields ?? REPLY_FIELDS).join(",");
 	const url = new URL(`${THREADS_API_BASE_URL}/${mediaId}/replies`);
 	url.searchParams.append("fields", fieldList);
 	url.searchParams.append("access_token", accessToken);
+
+	if (reverse !== undefined) {
+		url.searchParams.append("reverse", String(reverse));
+	}
 
 	if (options) {
 		if (options.since) url.searchParams.append("since", options.since);
