@@ -139,8 +139,8 @@ Requires `threads_keyword_search` permission for searching beyond your own
 posts.
 
 `searchLocations(accessToken, options)` searches for locations by name or
-coordinates. Options: `{ q?, latitude?, longitude? }`. Returns location objects
-with IDs you can pass to `createThreadsContainer` as `locationId`.
+coordinates. Options: `{ query?, latitude?, longitude? }`. Returns location
+objects with IDs you can pass to `createThreadsContainer` as `locationId`.
 
 `getLocation(locationId, accessToken, fields?)` returns details for a location
 (name, address, city, country, coordinates).
@@ -182,7 +182,7 @@ throws descriptive errors. Called automatically by `createThreadsContainer`.
 
 `checkContainerStatus(containerId, accessToken)` polls a container's publishing
 status. Returns `{ status, error_message? }` where `status` is `"FINISHED"`,
-`"IN_PROGRESS"`, `"EXPIRED"`, `"ERROR"`, or `"FAILED"`.
+`"IN_PROGRESS"`, `"EXPIRED"`, `"ERROR"`, or `"PUBLISHED"`.
 
 ## Testing
 
