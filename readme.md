@@ -1,224 +1,217 @@
 # Denim
 
-[![JSR](https://jsr.io/badges/@codybrom/denim)](https://jsr.io/@codybrom/denim) [![JSR Score](https://jsr.io/badges/@codybrom/denim/score)](https://jsr.io/@codybrom/denim)
+[![JSR](https://jsr.io/badges/@codybrom/denim)](https://jsr.io/@codybrom/denim)
+[![JSR Score](https://jsr.io/badges/@codybrom/denim/score)](https://jsr.io/@codybrom/denim)
 
-**Denim** is a TypeScript/Deno module designed to simplify the process of creating and managing posts on Threads. It provides an intuitive API for posting text, images, videos, and carousels, as well as retrieving posts and managing rate limits.
+A Deno/TypeScript wrapper for the
+[Threads API](https://developers.facebook.com/docs/threads). Covers posting,
+retrieval, replies, profiles, insights, search, locations, tokens, and oEmbed.
 
-## Features
-
-- **Create and Publish Posts**: Easily create and publish text, image, video, and carousel posts.
-- **Media Support**: Add alt text to images and videos, attach links to text posts, and control replies.
-- **Monitor Rate Limits**: Retrieve publishing rate limit information.
-- **Mock API**: Includes a mock API for testing purposes without hitting real endpoints.
-- **Edge Function Ready**: Deployable as a serverless edge function for real-time posting.
-
-## Installation
-
-### Using with Deno
-
-To add Denim to your Deno project, you can use the following command:
+You'll need a Threads app with an access token from
+[Meta's developer portal](https://developers.facebook.com/apps/). See the
+[Threads API docs](https://developers.facebook.com/docs/threads/get-started) for
+setup.
 
 ```bash
 deno add @codybrom/denim
 ```
 
-This will add the latest version of Denim to your project's dependencies.
+## Publishing
 
-## Usage
-
-### Importing
-
-To import Denim directly in your Deno project from JSR:
+Threads publishing is two steps: create a container, then publish it.
 
 ```typescript
-import { ThreadsPostRequest, createThreadsContainer, publishThreadsContainer } from 'jsr:@codybrom/denim';
-```
+import {
+	createThreadsContainer,
+	publishThreadsContainer,
+} from "@codybrom/denim";
 
-### Basic Usage
-
-Here's a basic example of creating and publishing a text post:
-
-```typescript
-import { createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim";
-
-const request: ThreadsPostRequest = {
-  userId: "YOUR_USER_ID",
-  accessToken: "YOUR_ACCESS_TOKEN",
-  mediaType: "TEXT",
-  text: "Hello, Threads!",
-};
-
-// Create a container
-const containerId = await createThreadsContainer(request);
-
-// Publish the container
-const publishedId = await publishThreadsContainer(request.userId, request.accessToken, containerId);
-
-console.log(`Post published with ID: ${publishedId}`);
-```
-
-#### Retrieving Publishing Rate Limit
-
-```typescript
-import { getPublishingLimit } from "jsr:@codybrom/denim";
-
-const rateLimit = await getPublishingLimit("YOUR_USER_ID", "YOUR_ACCESS_TOKEN");
-console.log("Current usage:", rateLimit.quota_usage);
-console.log("Total quota:", rateLimit.config.quota_total);
-```
-
-### Posting Different Media Types
-
-#### Text-only Post
-
-```typescript
-const textRequest: ThreadsPostRequest = {
-  userId: "YOUR_USER_ID",
-  accessToken: "YOUR_ACCESS_TOKEN",
-  mediaType: "TEXT",
-  text: "This is a text-only post on Threads!",
-};
-```
-
-#### Text Post with Link Attachment
-
-```typescript
-const textRequest: ThreadsPostRequest = {
-  userId: "YOUR_USER_ID",
-  accessToken: "YOUR_ACCESS_TOKEN",
-  mediaType: "TEXT",
-  text: "This is a post with an attached link on Threads!",
-  linkAttachment: "https://example.com",
-};
-```
-
-#### Image Post with Alt Text
-
-```typescript
-const imageRequest: ThreadsPostRequest = {
-  userId: "YOUR_USER_ID",
-  accessToken: "YOUR_ACCESS_TOKEN",
-  mediaType: "IMAGE",
-  text: "Check out this image!",
-  imageUrl: "https://example.com/image.jpg",
-  altText: "A beautiful sunset over the ocean",
-};
-```
-
-#### Video Post with Alt Text and Reply Controls
-
-```typescript
-const videoRequest: ThreadsPostRequest = {
-  userId: "YOUR_USER_ID",
-  accessToken: "YOUR_ACCESS_TOKEN",
-  mediaType: "VIDEO",
-  text: "Watch this video!",
-  videoUrl: "https://example.com/video.mp4",
-  altText: "A tutorial on how to make a chocolate cake",
-  replyControl: "mentioned_only",
-};
-```
-
-#### Carousel Post
-
-```typescript
-import { createCarouselItem, createThreadsContainer, publishThreadsContainer, ThreadsPostRequest } from "jsr:@codybrom/denim";
-// First, create carousel items
-const item1Id = await createCarouselItem({
-  userId: "YOUR_USER_ID",
-  accessToken: "YOUR_ACCESS_TOKEN",
-  mediaType: "IMAGE",
-  imageUrl: "https://example.com/image1.jpg",
-  altText: "First image",
+const container = await createThreadsContainer({
+	userId: "YOUR_USER_ID",
+	accessToken: "YOUR_ACCESS_TOKEN",
+	mediaType: "TEXT",
+	text: "Hello from Denim!",
 });
 
-const item2Id = await createCarouselItem({
-  userId: "YOUR_USER_ID",
-  accessToken: "YOUR_ACCESS_TOKEN",
-  mediaType: "VIDEO",
-  videoUrl: "https://example.com/video.mp4",
-  altText: "A video",
-});
-
-// Create and publish the carousel post
-const carouselRequest: ThreadsPostRequest = {
-  userId: "YOUR_USER_ID",
-  accessToken: "YOUR_ACCESS_TOKEN",
-  mediaType: "CAROUSEL",
-  text: "Check out this carousel!",
-  children: [item1Id, item2Id],
-};
-
-const carouselContainerId = await createThreadsContainer(carouselRequest);
-const publishedContainerId = await publishThreadsContainer(carouselRequest.userId, carouselRequest.accessToken, carouselContainerId);
+const containerId = typeof container === "string" ? container : container.id;
+await publishThreadsContainer("YOUR_USER_ID", "YOUR_ACCESS_TOKEN", containerId);
 ```
 
-## Deploying as an Edge Function
+`createThreadsContainer(request)` takes a `ThreadsPostRequest` and returns the
+container ID (or `{ id, permalink }`). The request requires `userId`,
+`accessToken`, `mediaType`, and usually `text`. Optional fields control the post
+type:
 
-Denim can be easily deployed as an edge function on serverless platforms that support Deno. An example implementation is available in `examples/edge-function.ts`.
+| Field             | Type       | Purpose                                                      |
+| ----------------- | ---------- | ------------------------------------------------------------ |
+| `imageUrl`        | `string`   | Image URL (for `IMAGE` or `CAROUSEL` items)                  |
+| `videoUrl`        | `string`   | Video URL (for `VIDEO` or `CAROUSEL` items)                  |
+| `altText`         | `string`   | Alt text for images and videos                               |
+| `linkAttachment`  | `string`   | URL to attach to a `TEXT` post                               |
+| `replyControl`    | `string`   | `"everyone"`, `"accounts_you_follow"`, or `"mentioned_only"` |
+| `replyToId`       | `string`   | Post ID to reply to                                          |
+| `quotePostId`     | `string`   | Post ID to quote                                             |
+| `pollAttachment`  | `object`   | `{ option_a, option_b, option_c?, option_d? }`               |
+| `topicTag`        | `string`   | Topic tag for the post                                       |
+| `isGhostPost`     | `boolean`  | Make a ghost post (text only, expires in 24h)                |
+| `isSpoilerMedia`  | `boolean`  | Hide media behind a spoiler overlay                          |
+| `textEntities`    | `array`    | Text spoiler ranges: `[{ entity_type, offset, length }]`     |
+| `textAttachment`  | `object`   | Long-form text: `{ plaintext, link_attachment_url? }`        |
+| `gifAttachment`   | `object`   | GIF: `{ gif_id, provider }`                                  |
+| `locationId`      | `string`   | Location ID from `searchLocations`                           |
+| `children`        | `string[]` | Carousel item IDs from `createCarouselItem`                  |
+| `autoPublishText` | `boolean`  | Skip the publish step for text posts                         |
 
-### Deployment Steps
+`publishThreadsContainer(userId, accessToken, containerId, getPermalink?)`
+publishes a container. Pass `true` for `getPermalink` to get `{ id, permalink }`
+instead of just the ID string.
 
-1. Copy `examples/edge-function.ts` to your project.
-2. Deploy the file to your serverless platform.
-3. Send requests to your function's URI.
+`createCarouselItem(request)` creates individual items for a carousel post.
+Takes the same request shape but `mediaType` must be `"IMAGE"` or `"VIDEO"`.
 
-### Example cURL Commands
+`repost(mediaId, accessToken)` reposts an existing thread. Returns `{ id }`.
 
-```bash
-# Post a text-only Thread
-curl -X POST <YOUR_FUNCTION_URI>/post \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_AUTH_KEY" \
-  -d '{
-    "userId": "YOUR_USER_ID",
-    "accessToken": "YOUR_ACCESS_TOKEN",
-    "mediaType": "TEXT",
-    "text": "Hello from Denim!"
-  }'
-# Post an image Thread
-curl -X POST <YOUR_FUNCTION_URI> \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_AUTH_KEY" \
-  -d '{
-    "userId": "YOUR_USER_ID",
-    "accessToken": "YOUR_ACCESS_TOKEN",
-    "mediaType": "IMAGE",
-    "text": "Check out this image I posted with Denim!",
-    "imageUrl": "https://example.com/image.jpg"
-  }'
+`deleteThread(mediaId, accessToken)` deletes a thread. Returns
+`{ success: boolean }`.
 
-# Post a video Thread
-curl -X POST <YOUR_FUNCTION_URI> \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_AUTH_KEY" \
-  -d '{
-    "userId": "YOUR_USER_ID",
-    "accessToken": "YOUR_ACCESS_TOKEN",
-    "mediaType": "VIDEO",
-    "text": "Watch this video I posted with Denim!",
-    "videoUrl": "https://example.com/video.mp4"
-  }'
+## Retrieval
+
+All retrieval functions accept an optional `fields` string array to request
+specific fields, and an optional `PaginationOptions` object
+(`{ since?, until?, limit?, before?, after? }`).
+
+`getThreadsList(userId, accessToken, options?, fields?)` returns a user's
+threads as `{ data: ThreadsPost[], paging }`.
+
+`getSingleThread(mediaId, accessToken, fields?)` returns a single `ThreadsPost`.
+
+`getGhostPosts(userId, accessToken, options?, fields?)` returns a user's ghost
+posts.
+
+## Profiles
+
+`getProfile(userId, accessToken, fields?)` returns the authenticated user's
+`ThreadsProfile` (username, name, bio, profile picture, verification status).
+
+`lookupProfile(accessToken, username)` looks up any public profile by username.
+Returns a `PublicProfile` with follower counts and engagement stats. Requires
+`threads_profile_discovery` permission.
+
+`getProfilePosts(accessToken, username, options?, fields?)` returns a public
+profile's posts.
+
+## Replies
+
+`getReplies(mediaId, accessToken, options?, fields?)` returns direct replies to
+a post.
+
+`getConversation(mediaId, accessToken, options?, fields?)` returns the full
+conversation thread (replies and nested replies).
+
+`getUserReplies(userId, accessToken, options?, fields?)` returns all replies
+made by a user.
+
+`manageReply(replyId, accessToken, hide)` hides or unhides a reply. Pass `true`
+to hide, `false` to unhide.
+
+## Insights
+
+`getMediaInsights(mediaId, accessToken, metrics)` returns metrics for a post.
+Pass metric names as a string array: `"views"`, `"likes"`, `"replies"`,
+`"reposts"`, `"quotes"`, `"shares"`.
+
+```typescript
+const insights = await getMediaInsights(postId, token, ["views", "likes"]);
+// insights.data[0].values[0].value => 42
 ```
 
-Note: Replace with your actual authorization headers if your edge function requires them (or remove them).
+`getUserInsights(userId, accessToken, metrics, options?)` returns user-level
+metrics. Accepts an options object with `since`/`until` timestamps and
+`breakdown` for demographics.
 
-## Security Note
+## Search & Locations
 
-Ensure your deployment uses proper access controls and authentication to protect sensitive data like access tokens.
+`searchKeyword(accessToken, options)` searches posts by keyword or topic tag.
+Options:
+`{ q, search_type?, search_mode?, media_type?, author_username?,
+...pagination }`.
+Requires `threads_keyword_search` permission for searching beyond your own
+posts.
+
+`searchLocations(accessToken, options)` searches for locations by name or
+coordinates. Options: `{ q?, latitude?, longitude? }`. Returns location objects
+with IDs you can pass to `createThreadsContainer` as `locationId`.
+
+`getLocation(locationId, accessToken, fields?)` returns details for a location
+(name, address, city, country, coordinates).
+
+## Tokens
+
+`exchangeCodeForToken(clientId, clientSecret, code, redirectUri)` exchanges an
+OAuth authorization code for a short-lived access token. Returns
+`{ access_token, user_id }`.
+
+`getAppAccessToken(clientId, clientSecret)` gets an app-level access token via
+client credentials. Returns `{ access_token, token_type }`.
+
+`exchangeToken(clientSecret, accessToken)` exchanges a short-lived token for a
+long-lived one (60 days). Returns `{ access_token, token_type, expires_in }`.
+
+`refreshToken(accessToken)` refreshes a long-lived token before it expires. Same
+return shape.
+
+`debugToken(accessToken, inputToken)` returns metadata about a token: app ID,
+scopes, expiry, validity.
+
+## Other
+
+`getPublishingLimit(userId, accessToken, fields?)` returns rate limit info: post
+quota, reply quota, and remaining usage.
+
+`getMentions(userId, accessToken, options?, fields?)` returns posts that mention
+the authenticated user.
+
+`getOEmbed(accessToken, url, maxWidth?)` returns embeddable HTML for a Threads
+post URL. Returns `{ html, provider_name, type, version, width }`.
+
+## Utilities
+
+`validateRequest(request)` checks a `ThreadsPostRequest` for invalid
+combinations (wrong media type for polls, too many text entities, etc.) and
+throws descriptive errors. Called automatically by `createThreadsContainer`.
+
+`checkContainerStatus(containerId, accessToken)` polls a container's publishing
+status. Returns a `ThreadsContainer` with `status`: `"FINISHED"`,
+`"IN_PROGRESS"`, `"EXPIRED"`, `"ERROR"`, or `"FAILED"`.
+
+`createVideoItemContainer(request)` creates a video container and waits for it
+to finish processing before returning.
 
 ## Testing
 
-Run the tests using:
+Denim ships a `MockThreadsAPI` interface for testing without network requests.
+Set an implementation on `globalThis.threadsAPI` and all functions route through
+it instead of calling the Threads API:
 
-```bash
-deno test mod_test.ts
+```typescript
+import { MockThreadsAPIImpl } from "@codybrom/denim";
+
+const mock = new MockThreadsAPIImpl();
+(globalThis as any).threadsAPI = mock;
+
+// Now all denim functions use the mock
+const container = await createThreadsContainer({ ... });
+
+// Enable error mode to test failure paths
+mock.setErrorMode(true);
 ```
 
-## Contributing
+See `mod_test.ts` for more examples.
 
-Contributions are welcome! Feel free to submit issues or pull requests.
+```bash
+deno task test
+```
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+[MIT](LICENSE)
