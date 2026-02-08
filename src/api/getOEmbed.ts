@@ -6,7 +6,7 @@ import { getAPI } from "../utils/getAPI.ts";
  * Retrieves oEmbed HTML for a Threads post.
  *
  * @param accessToken - The access token for authentication
- * @param url - The URL of the Threads post to embed
+ * @param postUrl - The URL of the Threads post to embed
  * @param maxWidth - Optional maximum width of the embed in pixels
  * @returns A Promise that resolves to the OEmbedResponse
  * @throws Will throw an error if the API request fails

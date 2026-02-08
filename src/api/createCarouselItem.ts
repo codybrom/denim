@@ -34,7 +34,7 @@ export async function createCarouselItem(
 	request: Omit<ThreadsPostRequest, "mediaType"> & {
 		mediaType: "IMAGE" | "VIDEO";
 	},
-): Promise<string | { id: string }> {
+): Promise<string> {
 	const api = getAPI();
 	if (api) {
 		// Use mock API
@@ -81,8 +81,7 @@ export async function createCarouselItem(
 	try {
 		const data = JSON.parse(responseText);
 		return data.id;
-	} catch (error) {
-		console.error(`Failed to parse response JSON: ${error}`);
+	} catch (_error) {
 		throw new Error(`Invalid response from Threads API: ${responseText}`);
 	}
 }

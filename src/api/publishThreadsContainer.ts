@@ -56,29 +56,33 @@ export async function publishThreadsContainer(
 		const publishData = await publishResponse.json();
 
 		// Check container status with exponential backoff
-		let status = await checkContainerStatus(containerId, accessToken);
+		let result = await checkContainerStatus(containerId, accessToken);
 		let attempts = 0;
 		const maxAttempts = 5;
 		const initialDelay = 500; // 0.5 seconds
 
 		while (
-			status !== "PUBLISHED" &&
-			status !== "FINISHED" &&
+			result.status !== "PUBLISHED" &&
+			result.status !== "FINISHED" &&
 			attempts < maxAttempts
 		) {
 			const delay = initialDelay * Math.pow(2, attempts);
 			await new Promise((resolve) => setTimeout(resolve, delay));
-			status = await checkContainerStatus(containerId, accessToken);
+			result = await checkContainerStatus(containerId, accessToken);
 			attempts++;
 		}
 
-		if (status === "ERROR") {
-			throw new Error(`Failed to publish container. Error: ${status}`);
+		if (result.status === "ERROR") {
+			throw new Error(
+				`Failed to publish container. Error: ${result.status}${
+					result.error_message ? ` - ${result.error_message}` : ""
+				}`,
+			);
 		}
 
-		if (status !== "PUBLISHED" && status !== "FINISHED") {
+		if (result.status !== "PUBLISHED" && result.status !== "FINISHED") {
 			throw new Error(
-				`Container not published after ${maxAttempts} attempts. Current status: ${status}`,
+				`Container not published after ${maxAttempts} attempts. Current status: ${result.status}`,
 			);
 		}
 

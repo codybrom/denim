@@ -1,6 +1,5 @@
 import { THREADS_API_BASE_URL } from "../constants.ts";
 import type { ThreadsPostRequest } from "../types.ts";
-import { createVideoItemContainer } from "../utils/createVideoItemContainer.ts";
 import { getAPI } from "../utils/getAPI.ts";
 import { validateRequest } from "../utils/validateRequest.ts";
 /**
@@ -25,7 +24,7 @@ import { validateRequest } from "../utils/validateRequest.ts";
  */
 export async function createThreadsContainer(
 	request: ThreadsPostRequest,
-): Promise<string | { id: string; permalink: string }> {
+): Promise<string> {
 	const api = getAPI();
 	if (api) {
 		// Use mock API
@@ -87,9 +86,7 @@ export async function createThreadsContainer(
 
 		// Handle media type specific parameters
 		if (request.mediaType === "VIDEO" && request.videoUrl) {
-			const videoItemId = await createVideoItemContainer(request);
-			body.set("media_type", "CAROUSEL");
-			body.append("children", videoItemId);
+			body.append("video_url", request.videoUrl);
 		} else if (request.mediaType === "IMAGE" && request.imageUrl) {
 			body.append("image_url", request.imageUrl);
 		} else if (request.mediaType === "TEXT" && request.linkAttachment) {
@@ -97,9 +94,6 @@ export async function createThreadsContainer(
 		} else if (request.mediaType === "CAROUSEL" && request.children) {
 			body.append("children", request.children.join(","));
 		}
-
-		console.log(`Sending request to: ${url}`);
-		console.log(`Request body: ${body.toString()}`);
 
 		const response = await fetch(url, {
 			method: "POST",
@@ -109,15 +103,13 @@ export async function createThreadsContainer(
 
 		const responseText = await response.text();
 
-		console.log(`Response status: ${response.status} ${response.statusText}`);
-		console.log(`Response body: ${responseText}`);
-
 		if (!response.ok) {
-			throw new Error(`Internal Server Error. Details: ${responseText}`);
+			throw new Error(
+				`Failed to create container (${response.status} ${response.statusText}): ${responseText}`,
+			);
 		}
 
 		const data = JSON.parse(responseText);
-		console.log(`Created container: ${data}`);
 
 		return data.id;
 	} catch (error) {

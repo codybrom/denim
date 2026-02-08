@@ -8,7 +8,7 @@
 /**
  * Media types used when creating posts.
  */
-export type MediaType = "TEXT" | "IMAGE" | "VIDEO" | "CAROUSEL" | "GIF";
+export type MediaType = "TEXT" | "IMAGE" | "VIDEO" | "CAROUSEL";
 
 /**
  * All media type values that can appear in API responses.
@@ -16,6 +16,7 @@ export type MediaType = "TEXT" | "IMAGE" | "VIDEO" | "CAROUSEL" | "GIF";
  */
 export type ResponseMediaType =
 	| MediaType
+	| "GIF"
 	| "TEXT_POST"
 	| "CAROUSEL_ALBUM"
 	| "REPOST_FACADE"
@@ -31,7 +32,7 @@ export type ReplyControl =
 	| "parent_post_author_only"
 	| "followers_only";
 
-// ─── Input Types (camelCase — what callers pass in) ──────────────────────────
+// ─── Input Types (what callers pass in) ──────────────────────────────────────
 
 /**
  * Options for poll attachments when creating a post.
@@ -756,7 +757,7 @@ export interface MockThreadsAPI {
 	// Existing methods
 	createThreadsContainer(
 		request: ThreadsPostRequest,
-	): Promise<string | { id: string; permalink: string }>;
+	): Promise<string>;
 
 	publishThreadsContainer(
 		userId: string,
@@ -769,7 +770,7 @@ export interface MockThreadsAPI {
 		request: Omit<ThreadsPostRequest, "mediaType"> & {
 			mediaType: "IMAGE" | "VIDEO";
 		},
-	): Promise<string | { id: string }>;
+	): Promise<string>;
 
 	getPublishingLimit(
 		userId: string,

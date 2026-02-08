@@ -181,11 +181,8 @@ combinations (wrong media type for polls, too many text entities, etc.) and
 throws descriptive errors. Called automatically by `createThreadsContainer`.
 
 `checkContainerStatus(containerId, accessToken)` polls a container's publishing
-status. Returns a `ThreadsContainer` with `status`: `"FINISHED"`,
+status. Returns `{ status, error_message? }` where `status` is `"FINISHED"`,
 `"IN_PROGRESS"`, `"EXPIRED"`, `"ERROR"`, or `"FAILED"`.
-
-`createVideoItemContainer(request)` creates a video container and waits for it
-to finish processing before returning.
 
 ## Testing
 

@@ -80,12 +80,8 @@ Deno.test("Denim API Tests", async (t) => {
 			};
 
 			const result = await createThreadsContainer(requestData);
-			if (typeof result === "string") {
-				assertEquals(result.length > 0, true);
-			} else {
-				assertEquals(typeof result.id, "string");
-				assertEquals(result.id.length > 0, true);
-			}
+			assertEquals(typeof result, "string");
+			assertEquals(result.length > 0, true);
 			teardownMockAPI();
 		});
 
@@ -101,12 +97,8 @@ Deno.test("Denim API Tests", async (t) => {
 			};
 
 			const containerId = await createThreadsContainer(requestData);
-			if (typeof containerId === "string") {
-				assertEquals(containerId.length > 0, true);
-			} else {
-				assertEquals(typeof containerId.id, "string");
-				assertEquals(containerId.id.length > 0, true);
-			}
+			assertEquals(typeof containerId, "string");
+			assertEquals(containerId.length > 0, true);
 			teardownMockAPI();
 		});
 
@@ -124,12 +116,8 @@ Deno.test("Denim API Tests", async (t) => {
 			};
 
 			const containerId = await createThreadsContainer(requestData);
-			if (typeof containerId === "string") {
-				assertEquals(containerId.length > 0, true);
-			} else {
-				assertEquals(typeof containerId.id, "string");
-				assertEquals(containerId.id.length > 0, true);
-			}
+			assertEquals(typeof containerId, "string");
+			assertEquals(containerId.length > 0, true);
 			teardownMockAPI();
 		});
 
@@ -148,11 +136,8 @@ Deno.test("Denim API Tests", async (t) => {
 			};
 
 			const result = await createThreadsContainer(requestData);
-			if (typeof result === "string") {
-				assertEquals(result.length > 0, true);
-			} else {
-				assertEquals(typeof result.id, "string");
-			}
+			assertEquals(typeof result, "string");
+			assertEquals(result.length > 0, true);
 			teardownMockAPI();
 		});
 
@@ -170,11 +155,8 @@ Deno.test("Denim API Tests", async (t) => {
 			};
 
 			const result = await createThreadsContainer(requestData);
-			if (typeof result === "string") {
-				assertEquals(result.length > 0, true);
-			} else {
-				assertEquals(typeof result.id, "string");
-			}
+			assertEquals(typeof result, "string");
+			assertEquals(result.length > 0, true);
 			teardownMockAPI();
 		});
 
@@ -189,11 +171,8 @@ Deno.test("Denim API Tests", async (t) => {
 			};
 
 			const result = await createThreadsContainer(requestData);
-			if (typeof result === "string") {
-				assertEquals(result.length > 0, true);
-			} else {
-				assertEquals(typeof result.id, "string");
-			}
+			assertEquals(typeof result, "string");
+			assertEquals(result.length > 0, true);
 			teardownMockAPI();
 		});
 
@@ -208,11 +187,8 @@ Deno.test("Denim API Tests", async (t) => {
 			};
 
 			const result = await createThreadsContainer(requestData);
-			if (typeof result === "string") {
-				assertEquals(result.length > 0, true);
-			} else {
-				assertEquals(typeof result.id, "string");
-			}
+			assertEquals(typeof result, "string");
+			assertEquals(result.length > 0, true);
 			teardownMockAPI();
 		});
 
@@ -227,11 +203,8 @@ Deno.test("Denim API Tests", async (t) => {
 			};
 
 			const result = await createThreadsContainer(requestData);
-			if (typeof result === "string") {
-				assertEquals(result.length > 0, true);
-			} else {
-				assertEquals(typeof result.id, "string");
-			}
+			assertEquals(typeof result, "string");
+			assertEquals(result.length > 0, true);
 			teardownMockAPI();
 		});
 
@@ -247,11 +220,8 @@ Deno.test("Denim API Tests", async (t) => {
 			};
 
 			const result = await createThreadsContainer(requestData);
-			if (typeof result === "string") {
-				assertEquals(result.length > 0, true);
-			} else {
-				assertEquals(typeof result.id, "string");
-			}
+			assertEquals(typeof result, "string");
+			assertEquals(result.length > 0, true);
 			teardownMockAPI();
 		});
 
@@ -465,7 +435,7 @@ Deno.test("Denim API Tests", async (t) => {
 			const result = await publishThreadsContainer(
 				userId,
 				accessToken,
-				typeof containerId === "string" ? containerId : containerId.id,
+				containerId,
 			);
 			if (typeof result === "string") {
 				assertEquals(result.length > 0, true);
@@ -502,7 +472,7 @@ Deno.test("Denim API Tests", async (t) => {
 			const result = await publishThreadsContainer(
 				userId,
 				accessToken,
-				typeof containerId === "string" ? containerId : containerId.id,
+				containerId,
 				true,
 			);
 
@@ -531,7 +501,7 @@ Deno.test("Denim API Tests", async (t) => {
 			const result = await publishThreadsContainer(
 				userId,
 				accessToken,
-				typeof containerId === "string" ? containerId : containerId.id,
+				containerId,
 				false,
 			);
 
@@ -554,12 +524,8 @@ Deno.test("Denim API Tests", async (t) => {
 			};
 
 			const itemId = await createCarouselItem(requestData);
-			if (typeof itemId === "string") {
-				assertEquals(itemId.length > 0, true);
-			} else {
-				assertEquals(typeof itemId.id, "string");
-				assertEquals(itemId.id.length > 0, true);
-			}
+			assertEquals(typeof itemId, "string");
+			assertEquals(itemId.length > 0, true);
 			teardownMockAPI();
 		});
 
@@ -574,12 +540,8 @@ Deno.test("Denim API Tests", async (t) => {
 			};
 
 			const itemId = await createCarouselItem(requestData);
-			if (typeof itemId === "string") {
-				assertEquals(itemId.length > 0, true);
-			} else {
-				assertEquals(typeof itemId.id, "string");
-				assertEquals(itemId.id.length > 0, true);
-			}
+			assertEquals(typeof itemId, "string");
+			assertEquals(itemId.length > 0, true);
 			teardownMockAPI();
 		});
 	});
@@ -633,7 +595,7 @@ Deno.test("Denim API Tests", async (t) => {
 		const mediaId = await publishThreadsContainer(
 			userId,
 			accessToken,
-			typeof containerId === "string" ? containerId : containerId.id,
+			containerId,
 		);
 
 		const result = await getSingleThread(
@@ -692,7 +654,7 @@ Deno.test("Denim API Tests", async (t) => {
 			const mediaId = await publishThreadsContainer(
 				"12345",
 				"token",
-				typeof containerId === "string" ? containerId : containerId.id,
+				containerId,
 			);
 
 			const result = await repost(
@@ -729,7 +691,7 @@ Deno.test("Denim API Tests", async (t) => {
 			const mediaId = await publishThreadsContainer(
 				"12345",
 				"token",
-				typeof containerId === "string" ? containerId : containerId.id,
+				containerId,
 			);
 
 			const result = await deleteThread(

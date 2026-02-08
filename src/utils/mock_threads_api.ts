@@ -58,7 +58,7 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 
 	createThreadsContainer(
 		request: ThreadsPostRequest,
-	): Promise<string | { id: string; permalink: string }> {
+	): Promise<string> {
 		if (this.errorMode) {
 			return Promise.reject(new Error("Failed to create Threads container"));
 		}
@@ -91,8 +91,7 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		};
 		this.posts.set(postId, post);
 
-		// Always return an object with both id and permalink
-		return Promise.resolve({ id: containerId, permalink });
+		return Promise.resolve(containerId);
 	}
 
 	publishThreadsContainer(
@@ -134,7 +133,7 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		request: Omit<ThreadsPostRequest, "mediaType"> & {
 			mediaType: "IMAGE" | "VIDEO";
 		},
-	): Promise<string | { id: string }> {
+	): Promise<string> {
 		const itemId = `item_${Math.random().toString(36).substring(7)}`;
 		const container: ThreadsContainer = {
 			id: itemId,
@@ -142,7 +141,7 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 			status: "FINISHED",
 		};
 		this.containers.set(itemId, container);
-		return Promise.resolve({ id: itemId });
+		return Promise.resolve(itemId);
 	}
 
 	getPublishingLimit(

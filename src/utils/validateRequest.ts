@@ -89,13 +89,28 @@ export async function validateRequest(
 }
 
 async function validateImageSpecs(imageUrl: string): Promise<void> {
-	const response = await fetch(imageUrl, { method: "HEAD" });
+	let response: Response;
+	try {
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), 5000);
+		response = await fetch(imageUrl, {
+			method: "HEAD",
+			signal: controller.signal,
+		});
+		clearTimeout(timeoutId);
+	} catch (_error) {
+		// HEAD not supported or network error — skip validation
+		return;
+	}
+
+	if (response.status === 405) return;
 
 	if (!response.ok) {
 		throw new Error(`Failed to fetch image: ${response.statusText}`);
 	}
 
-	const contentType = response.headers.get("content-type");
+	const contentType = response.headers.get("content-type")?.split(";")[0]
+		.trim();
 	if (!contentType || !["image/jpeg", "image/png"].includes(contentType)) {
 		throw new Error("Image format must be JPEG or PNG");
 	}
@@ -104,20 +119,31 @@ async function validateImageSpecs(imageUrl: string): Promise<void> {
 	if (contentLength && parseInt(contentLength, 10) > 8 * 1024 * 1024) {
 		throw new Error("Image file size must not exceed 8 MB");
 	}
-
-	// Note: Aspect ratio and dimensions checks would still require
-	// downloading and analyzing the full image, which might be too
-	// resource-intensive for an edge function.
 }
 
 async function validateVideoSpecs(videoUrl: string): Promise<void> {
-	const response = await fetch(videoUrl, { method: "HEAD" });
+	let response: Response;
+	try {
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), 5000);
+		response = await fetch(videoUrl, {
+			method: "HEAD",
+			signal: controller.signal,
+		});
+		clearTimeout(timeoutId);
+	} catch (_error) {
+		// HEAD not supported or network error — skip validation
+		return;
+	}
+
+	if (response.status === 405) return;
 
 	if (!response.ok) {
 		throw new Error(`Failed to fetch video: ${response.statusText}`);
 	}
 
-	const contentType = response.headers.get("content-type");
+	const contentType = response.headers.get("content-type")?.split(";")[0]
+		.trim();
 	if (!contentType || !["video/quicktime", "video/mp4"].includes(contentType)) {
 		throw new Error("Video format must be MOV or MP4");
 	}
@@ -126,10 +152,6 @@ async function validateVideoSpecs(videoUrl: string): Promise<void> {
 	if (contentLength && parseInt(contentLength, 10) > 1024 * 1024 * 1024) {
 		throw new Error("Video file size must not exceed 1 GB");
 	}
-
-	// Note: Other specifications like codec, frame rate, bitrate, duration
-	// would still require downloading and analyzing the full video, which
-	// might be too resource-intensive for an edge function.
 }
 
 function validateLinkUrl(url: string): void {
