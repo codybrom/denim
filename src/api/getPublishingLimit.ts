@@ -1,8 +1,6 @@
-import {
-	getAPI,
-	type PublishingLimit,
-	THREADS_API_BASE_URL,
-} from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { PublishingLimit } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
 
 const DEFAULT_FIELDS = [
 	"quota_usage",

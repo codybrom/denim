@@ -1,4 +1,5 @@
-import { getAPI, THREADS_API_BASE_URL } from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import { getAPI } from "../utils/getAPI.ts";
 
 /**
  * Hides or unhides a reply on a Threads post.

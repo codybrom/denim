@@ -1,9 +1,6 @@
-import {
-	getAPI,
-	type PaginationOptions,
-	THREADS_API_BASE_URL,
-	type ThreadsListResponse,
-} from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { PaginationOptions, ThreadsListResponse } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
 
 const DEFAULT_FIELDS = [
 	"id",

@@ -1,4 +1,4 @@
-import type { MockThreadsAPI } from "../../mod.ts";
+import type { MockThreadsAPI } from "../types.ts";
 type GlobalWithEnvironment = typeof globalThis & {
 	threadsAPI?: MockThreadsAPI;
 };

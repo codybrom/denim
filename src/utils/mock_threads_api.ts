@@ -18,7 +18,7 @@ import type {
 	TokenResponse,
 	UserInsightsOptions,
 	UserInsightsResponse,
-} from "../../mod.ts";
+} from "../types.ts";
 
 export class MockThreadsAPIImpl implements MockThreadsAPI {
 	private containers: Map<string, ThreadsContainer> = new Map();

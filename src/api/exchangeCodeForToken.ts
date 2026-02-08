@@ -1,8 +1,6 @@
-import {
-	type AuthCodeResponse,
-	getAPI,
-	THREADS_API_BASE_URL,
-} from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { AuthCodeResponse } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
 
 /**
  * Exchanges an OAuth authorization code for a short-lived access token.

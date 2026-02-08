@@ -1,4 +1,6 @@
-import { getAPI, type PublicProfile, THREADS_API_BASE_URL } from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { PublicProfile } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
 
 /**
  * Looks up a public Threads profile by username.

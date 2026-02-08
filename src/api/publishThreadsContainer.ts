@@ -1,9 +1,7 @@
-import {
-	checkContainerStatus,
-	getAPI,
-	getSingleThread,
-	THREADS_API_BASE_URL,
-} from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import { checkContainerStatus } from "../utils/checkContainerStatus.ts";
+import { getAPI } from "../utils/getAPI.ts";
+import { getSingleThread } from "./getSingleThread.ts";
 /**
  * Publishes a Threads media container.
  *

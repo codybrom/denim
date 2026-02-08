@@ -1,9 +1,6 @@
-import {
-	getAPI,
-	type LocationSearchOptions,
-	THREADS_API_BASE_URL,
-	type ThreadsLocation,
-} from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { LocationSearchOptions, ThreadsLocation } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
 
 /**
  * Searches for locations on Threads.

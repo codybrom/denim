@@ -24,13 +24,14 @@ import {
 	getUserReplies,
 	lookupProfile,
 	manageReply,
+	type MockThreadsAPI,
 	publishThreadsContainer,
 	refreshToken,
 	repost,
 	searchKeyword,
 	searchLocations,
+	type ThreadsPostRequest,
 } from "./mod.ts";
-import type { MockThreadsAPI, ThreadsPostRequest } from "./src/types.ts";
 import { MockThreadsAPIImpl } from "./src/utils/mock_threads_api.ts";
 
 let mockAPI: MockThreadsAPIImpl;

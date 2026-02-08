@@ -1,8 +1,6 @@
-import {
-	getAPI,
-	THREADS_API_BASE_URL,
-	type ThreadsPostRequest,
-} from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { ThreadsPostRequest } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
 /**
  * Creates a carousel item for a Threads carousel post.
  *

@@ -1,4 +1,5 @@
-import { THREADS_API_BASE_URL, type ThreadsPostRequest } from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { ThreadsPostRequest } from "../types.ts";
 /**
  * Creates a video item container for Threads.
  *

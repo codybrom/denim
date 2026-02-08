@@ -1,10 +1,8 @@
-import {
-	createVideoItemContainer,
-	getAPI,
-	THREADS_API_BASE_URL,
-	type ThreadsPostRequest,
-	validateRequest,
-} from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { ThreadsPostRequest } from "../types.ts";
+import { createVideoItemContainer } from "../utils/createVideoItemContainer.ts";
+import { getAPI } from "../utils/getAPI.ts";
+import { validateRequest } from "../utils/validateRequest.ts";
 /**
  * Creates a Threads media container.
  *

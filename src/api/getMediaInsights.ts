@@ -1,8 +1,6 @@
-import {
-	getAPI,
-	type MediaInsightsResponse,
-	THREADS_API_BASE_URL,
-} from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { MediaInsightsResponse } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
 
 /**
  * Retrieves insight metrics for a specific Threads media object.

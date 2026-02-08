@@ -1,8 +1,6 @@
-import {
-	type DebugTokenInfo,
-	getAPI,
-	THREADS_API_BASE_URL,
-} from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { DebugTokenInfo } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
 
 /**
  * Retrieves debug information about an access token.

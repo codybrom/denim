@@ -1,9 +1,6 @@
-import {
-	getAPI,
-	THREADS_API_BASE_URL,
-	type UserInsightsOptions,
-	type UserInsightsResponse,
-} from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { UserInsightsOptions, UserInsightsResponse } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
 
 /**
  * Retrieves insight metrics for a Threads user.

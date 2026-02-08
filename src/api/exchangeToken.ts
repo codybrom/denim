@@ -1,4 +1,6 @@
-import { getAPI, THREADS_API_BASE_URL, type TokenResponse } from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { TokenResponse } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
 
 /**
  * Exchanges a short-lived access token for a long-lived one.

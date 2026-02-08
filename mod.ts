@@ -6,8 +6,6 @@
  * posting, retrieval, replies, insights, search, locations, and more.
  */
 
-import { handleRequest } from "./src/server/handleRequest.ts";
-
 // ─── Types ───────────────────────────────────────────────────────────────────
 import type {
 	AuthCodeResponse,
@@ -89,9 +87,6 @@ export type {
 	WebhookReplyValue,
 };
 
-/** The base URL for the Threads API */
-export const THREADS_API_BASE_URL = "https://graph.threads.net/v1.0";
-
 // ─── Publishing ──────────────────────────────────────────────────────────────
 export { createCarouselItem } from "./src/api/createCarouselItem.ts";
 export { createThreadsContainer } from "./src/api/createThreadsContainer.ts";
@@ -139,15 +134,3 @@ export { getOEmbed } from "./src/api/getOEmbed.ts";
 
 // ─── Rate Limits ─────────────────────────────────────────────────────────────
 export { getPublishingLimit } from "./src/api/getPublishingLimit.ts";
-
-// ─── Utilities ───────────────────────────────────────────────────────────────
-export { checkContainerStatus } from "./src/utils/checkContainerStatus.ts";
-export { createVideoItemContainer } from "./src/utils/createVideoItemContainer.ts";
-export { getAPI } from "./src/utils/getAPI.ts";
-export { validateRequest } from "./src/utils/validateRequest.ts";
-
-// Main function to start the server
-if (import.meta.main) {
-	console.log("Starting Denim server...");
-	Deno.serve(handleRequest);
-}

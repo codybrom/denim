@@ -1,4 +1,6 @@
-import { getAPI, THREADS_API_BASE_URL, type TokenResponse } from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { TokenResponse } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
 
 /**
  * Gets an app-level access token using client credentials.

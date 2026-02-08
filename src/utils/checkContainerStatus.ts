@@ -1,4 +1,4 @@
-import { THREADS_API_BASE_URL } from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
 /**
  * Checks the status of a Threads container.
  *

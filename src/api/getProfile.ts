@@ -1,8 +1,6 @@
-import {
-	getAPI,
-	THREADS_API_BASE_URL,
-	type ThreadsProfile,
-} from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { ThreadsProfile } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
 
 const DEFAULT_FIELDS = [
 	"id",

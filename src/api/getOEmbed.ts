@@ -1,8 +1,6 @@
-import {
-	getAPI,
-	type OEmbedResponse,
-	THREADS_API_BASE_URL,
-} from "../../mod.ts";
+import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { OEmbedResponse } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
 
 /**
  * Retrieves oEmbed HTML for a Threads post.

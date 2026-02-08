@@ -1,4 +1,4 @@
-import type { ThreadsPostRequest } from "../../mod.ts";
+import type { ThreadsPostRequest } from "../types.ts";
 /**
  * Validates the ThreadsPostRequest object to ensure correct usage of media-specific properties.
  *
