@@ -1,4 +1,4 @@
-import { THREADS_API_BASE_URL } from "../constants.ts";
+import { THREADS_OAUTH_BASE_URL } from "../constants.ts";
 import type { TokenResponse } from "../types.ts";
 import { getAPI } from "../utils/getAPI.ts";
 
@@ -17,7 +17,7 @@ export async function refreshToken(
 		return api.refreshToken(accessToken);
 	}
 
-	const url = new URL(`${THREADS_API_BASE_URL}/refresh_access_token`);
+	const url = new URL(`${THREADS_OAUTH_BASE_URL}/refresh_access_token`);
 	url.searchParams.append("grant_type", "th_refresh_token");
 	url.searchParams.append("access_token", accessToken);
 

@@ -66,8 +66,8 @@ export async function searchKeyword(
 	if (options.author_username) {
 		url.searchParams.append("author_username", options.author_username);
 	}
-	if (options.since) url.searchParams.append("since", options.since);
-	if (options.until) url.searchParams.append("until", options.until);
+	if (options.since) url.searchParams.append("since", String(options.since));
+	if (options.until) url.searchParams.append("until", String(options.until));
 	if (options.limit) {
 		url.searchParams.append("limit", options.limit.toString());
 	}

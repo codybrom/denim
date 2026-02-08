@@ -33,6 +33,36 @@ export async function publishThreadsContainer(
 		);
 	}
 	try {
+		// Poll container status until FINISHED before publishing
+		let result = await checkContainerStatus(containerId, accessToken);
+		let attempts = 0;
+		const maxAttempts = 5;
+		const initialDelay = 500; // 0.5 seconds
+
+		while (
+			result.status !== "FINISHED" &&
+			attempts < maxAttempts
+		) {
+			if (result.status === "ERROR" || result.status === "EXPIRED") {
+				throw new Error(
+					`Container cannot be published. Status: ${result.status}${
+						result.error_message ? ` - ${result.error_message}` : ""
+					}`,
+				);
+			}
+			const delay = initialDelay * Math.pow(2, attempts);
+			await new Promise((resolve) => setTimeout(resolve, delay));
+			result = await checkContainerStatus(containerId, accessToken);
+			attempts++;
+		}
+
+		if (result.status !== "FINISHED") {
+			throw new Error(
+				`Container not ready after ${maxAttempts} attempts. Current status: ${result.status}`,
+			);
+		}
+
+		// Publish the container
 		const publishUrl = `${THREADS_API_BASE_URL}/${userId}/threads_publish`;
 		const publishBody = new URLSearchParams({
 			access_token: accessToken,
@@ -54,37 +84,6 @@ export async function publishThreadsContainer(
 		}
 
 		const publishData = await publishResponse.json();
-
-		// Check container status with exponential backoff
-		let result = await checkContainerStatus(containerId, accessToken);
-		let attempts = 0;
-		const maxAttempts = 5;
-		const initialDelay = 500; // 0.5 seconds
-
-		while (
-			result.status !== "PUBLISHED" &&
-			result.status !== "FINISHED" &&
-			attempts < maxAttempts
-		) {
-			const delay = initialDelay * Math.pow(2, attempts);
-			await new Promise((resolve) => setTimeout(resolve, delay));
-			result = await checkContainerStatus(containerId, accessToken);
-			attempts++;
-		}
-
-		if (result.status === "ERROR") {
-			throw new Error(
-				`Failed to publish container. Error: ${result.status}${
-					result.error_message ? ` - ${result.error_message}` : ""
-				}`,
-			);
-		}
-
-		if (result.status !== "PUBLISHED" && result.status !== "FINISHED") {
-			throw new Error(
-				`Container not published after ${maxAttempts} attempts. Current status: ${result.status}`,
-			);
-		}
 
 		if (getPermalink) {
 			const threadData = await getSingleThread(publishData.id, accessToken);

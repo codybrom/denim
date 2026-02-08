@@ -2,13 +2,7 @@ import { THREADS_API_BASE_URL, USER_THREADS_FIELDS } from "../constants.ts";
 import type { PaginationOptions, ThreadsListResponse } from "../types.ts";
 import { getAPI } from "../utils/getAPI.ts";
 
-const DEFAULT_FIELDS = [
-	...USER_THREADS_FIELDS,
-	"poll_attachment",
-	"topic_tag",
-	"ghost_post_status",
-	"ghost_post_expiration_timestamp",
-];
+const DEFAULT_FIELDS = USER_THREADS_FIELDS;
 
 /**
  * Retrieves a list of ghost posts created by a user.
@@ -37,8 +31,8 @@ export async function getGhostPosts(
 	url.searchParams.append("access_token", accessToken);
 
 	if (options) {
-		if (options.since) url.searchParams.append("since", options.since);
-		if (options.until) url.searchParams.append("until", options.until);
+		if (options.since) url.searchParams.append("since", String(options.since));
+		if (options.until) url.searchParams.append("until", String(options.until));
 		if (options.limit) {
 			url.searchParams.append("limit", options.limit.toString());
 		}

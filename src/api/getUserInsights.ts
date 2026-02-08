@@ -5,8 +5,8 @@ import { getAPI } from "../utils/getAPI.ts";
 /**
  * Retrieves insight metrics for a Threads user.
  *
- * Available metrics: views, likes, replies, reposts, quotes, followers_count,
- * follower_demographics, reached_audience_demographics
+ * Available metrics: views, likes, replies, reposts, quotes, clicks,
+ * followers_count, follower_demographics
  *
  * @param userId - The user ID of the Threads account
  * @param accessToken - The access token for authentication

@@ -5,8 +5,7 @@ import { getAPI } from "../utils/getAPI.ts";
 /**
  * Retrieves insight metrics for a specific Threads media object.
  *
- * Available metrics: views, likes, replies, reposts, quotes, shares,
- * follower_demographics, non_follower_demographics, reach_demographics
+ * Available metrics: views, likes, replies, reposts, quotes, shares
  *
  * @param mediaId - The ID of the Threads media object
  * @param accessToken - The access token for authentication

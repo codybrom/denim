@@ -1,4 +1,4 @@
-import { THREADS_API_BASE_URL } from "../constants.ts";
+import { THREADS_OAUTH_BASE_URL } from "../constants.ts";
 import type { AuthCodeResponse } from "../types.ts";
 import { getAPI } from "../utils/getAPI.ts";
 
@@ -24,7 +24,7 @@ export async function exchangeCodeForToken(
 		return api.exchangeCodeForToken(clientId, clientSecret, code, redirectUri);
 	}
 
-	const url = `${THREADS_API_BASE_URL}/oauth/access_token`;
+	const url = `${THREADS_OAUTH_BASE_URL}/oauth/access_token`;
 	const body = new URLSearchParams({
 		client_id: clientId,
 		client_secret: clientSecret,

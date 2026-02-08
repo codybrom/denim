@@ -82,8 +82,8 @@ export interface TextAttachmentInput {
 export interface GifAttachment {
 	/** The GIF ID from the provider */
 	gif_id: string;
-	/** The GIF provider (e.g., "tenor") */
-	provider: string;
+	/** The GIF provider */
+	provider: "TENOR";
 }
 
 /**
@@ -143,9 +143,9 @@ export interface ThreadsPostRequest {
  */
 export interface PaginationOptions {
 	/** Start date (Unix timestamp or strtotime-parseable string) */
-	since?: string;
+	since?: string | number;
 	/** End date (Unix timestamp or strtotime-parseable string) */
-	until?: string;
+	until?: string | number;
 	/** Maximum number of results (default 25, max 100) */
 	limit?: number;
 	/** Cursor for previous page */
@@ -379,7 +379,7 @@ export interface ThreadsContainer {
 	/** Permanent link to the container */
 	permalink?: string;
 	/** Status of the container */
-	status?: "FINISHED" | "FAILED" | "IN_PROGRESS" | "EXPIRED" | "ERROR";
+	status?: "EXPIRED" | "ERROR" | "FINISHED" | "IN_PROGRESS" | "PUBLISHED";
 	/** Error message if the container failed */
 	error_message?: string;
 }
@@ -432,8 +432,6 @@ export interface PublicProfile {
 	reposts_count?: number;
 	/** Views count (past 7 days) */
 	views_count?: number;
-	/** Replies count (past 7 days) */
-	replies_count?: number;
 }
 
 // ─── Insights Types ──────────────────────────────────────────────────────────
@@ -529,7 +527,7 @@ export interface KeywordSearchOptions extends PaginationOptions {
 	/** Search mode: KEYWORD (default) or TAG (topic tag search) */
 	search_mode?: "KEYWORD" | "TAG";
 	/** Filter by media type */
-	media_type?: "TEXT" | "IMAGE" | "VIDEO" | "CAROUSEL";
+	media_type?: "TEXT" | "IMAGE" | "VIDEO";
 	/** Filter by author username */
 	author_username?: string;
 }

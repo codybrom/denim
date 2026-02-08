@@ -9,6 +9,10 @@ const DEFAULT_FIELDS = [
 	"biography",
 	"is_verified",
 	"follower_count",
+	"likes_count",
+	"quotes_count",
+	"reposts_count",
+	"views_count",
 ];
 
 /**

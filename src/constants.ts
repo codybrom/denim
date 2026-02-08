@@ -1,6 +1,9 @@
 /** The base URL for the Threads API */
 export const THREADS_API_BASE_URL = "https://graph.threads.net/v1.0";
 
+/** The base URL for OAuth/token endpoints (no version prefix) */
+export const THREADS_OAUTH_BASE_URL = "https://graph.threads.net";
+
 /** Fields common to all media post endpoints */
 const MEDIA_BASE_FIELDS = [
 	"id",
@@ -30,9 +33,15 @@ export const USER_THREADS_FIELDS = [
 	"quoted_post",
 	"reposted_post",
 	"gif_url",
+	"poll_attachment",
+	"topic_tag",
 	"is_spoiler_media",
 	"text_entities",
 	"text_attachment",
+	"ghost_post_status",
+	"ghost_post_expiration_timestamp",
+	"location_id",
+	"location",
 ];
 
 /** Fields for single thread retrieval (GET /{media-id}) */
@@ -43,10 +52,6 @@ export const SINGLE_THREAD_FIELDS = [
 	"root_post",
 	"replied_to",
 	"hide_status",
-	"poll_attachment",
-	"topic_tag",
-	"location_id",
-	"location",
 ];
 
 /** Fields for reply/conversation endpoints */
@@ -61,6 +66,7 @@ export const REPLY_FIELDS = [
 	"quoted_post",
 	"reposted_post",
 	"gif_url",
+	"poll_attachment",
 	"topic_tag",
 ];
 

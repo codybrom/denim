@@ -29,8 +29,8 @@ export async function getThreadsList(
 	url.searchParams.append("access_token", accessToken);
 
 	if (options) {
-		if (options.since) url.searchParams.append("since", options.since);
-		if (options.until) url.searchParams.append("until", options.until);
+		if (options.since) url.searchParams.append("since", String(options.since));
+		if (options.until) url.searchParams.append("until", String(options.until));
 		if (options.limit) {
 			url.searchParams.append("limit", options.limit.toString());
 		}

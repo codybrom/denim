@@ -1,4 +1,4 @@
-import { THREADS_API_BASE_URL } from "../constants.ts";
+import { THREADS_OAUTH_BASE_URL } from "../constants.ts";
 import type { TokenResponse } from "../types.ts";
 import { getAPI } from "../utils/getAPI.ts";
 
@@ -20,7 +20,7 @@ export async function getAppAccessToken(
 		return api.getAppAccessToken(clientId, clientSecret);
 	}
 
-	const url = new URL(`${THREADS_API_BASE_URL}/oauth/access_token`);
+	const url = new URL(`${THREADS_OAUTH_BASE_URL}/oauth/access_token`);
 	url.searchParams.append("grant_type", "client_credentials");
 	url.searchParams.append("client_id", clientId);
 	url.searchParams.append("client_secret", clientSecret);
