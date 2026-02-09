@@ -10,6 +10,7 @@ import type {
 	PaginationOptions,
 	PublicProfile,
 	PublishingLimit,
+	ResponseMediaType,
 	ThreadsContainer,
 	ThreadsListResponse,
 	ThreadsLocation,
@@ -78,7 +79,7 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		const post: ThreadsPost = {
 			id: postId,
 			media_product_type: "THREADS",
-			media_type: request.mediaType,
+			media_type: request.mediaType as ResponseMediaType,
 			permalink,
 			owner: { id: request.userId },
 			username: "testuser",
@@ -135,6 +136,9 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 			mediaType: "IMAGE" | "VIDEO";
 		},
 	): Promise<string> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to create carousel item"));
+		}
 		const itemId = `item_${Math.random().toString(36).substring(7)}`;
 		const container: ThreadsContainer = {
 			id: itemId,
@@ -166,6 +170,9 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		options?: PaginationOptions,
 		_fields?: string[],
 	): Promise<ThreadsListResponse> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to retrieve threads list"));
+		}
 		const threads = Array.from(this.posts.values())
 			.filter((post) => post.owner?.id === userId)
 			.slice(0, options?.limit || 25);
@@ -186,6 +193,9 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		_accessToken: string,
 		_fields?: string[],
 	): Promise<ThreadsPost> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to retrieve thread"));
+		}
 		const post = this.posts.get(mediaId);
 		if (!post) {
 			return Promise.reject(new Error("Thread not found"));
@@ -265,6 +275,9 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		options?: PaginationOptions,
 		_fields?: string[],
 	): Promise<ThreadsListResponse> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to get profile posts"));
+		}
 		const posts = Array.from(this.posts.values()).slice(
 			0,
 			options?.limit || 25,
@@ -283,6 +296,9 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		options?: PaginationOptions,
 		_fields?: string[],
 	): Promise<ThreadsListResponse> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to get ghost posts"));
+		}
 		const posts = Array.from(this.posts.values())
 			.filter((p) => p.owner?.id === userId)
 			.slice(0, options?.limit || 25);
@@ -300,6 +316,9 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		options?: PaginationOptions,
 		_fields?: string[],
 	): Promise<ThreadsListResponse> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to get user replies"));
+		}
 		const replies = Array.from(this.posts.values())
 			.filter((p) => p.owner?.id === userId && p.is_reply)
 			.slice(0, options?.limit || 25);
@@ -318,6 +337,9 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		_fields?: string[],
 		_reverse?: boolean,
 	): Promise<ThreadsListResponse> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to get replies"));
+		}
 		return Promise.resolve({
 			data: Array.from(this.posts.values()).slice(0, 25),
 			paging: {
@@ -333,6 +355,9 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		_fields?: string[],
 		_reverse?: boolean,
 	): Promise<ThreadsListResponse> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to get conversation"));
+		}
 		return Promise.resolve({
 			data: Array.from(this.posts.values()).slice(0, 25),
 			paging: {
@@ -358,6 +383,9 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		options?: PaginationOptions,
 		_fields?: string[],
 	): Promise<ThreadsListResponse> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to get mentions"));
+		}
 		return Promise.resolve({
 			data: Array.from(this.posts.values()).slice(0, options?.limit || 25),
 			paging: {
@@ -412,6 +440,9 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		_options: KeywordSearchOptions,
 		_fields?: string[],
 	): Promise<ThreadsListResponse> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to search keywords"));
+		}
 		return Promise.resolve({
 			data: Array.from(this.posts.values()),
 			paging: {
@@ -425,6 +456,9 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		_options: LocationSearchOptions,
 		_fields?: string[],
 	): Promise<{ data: ThreadsLocation[] }> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to search locations"));
+		}
 		return Promise.resolve({
 			data: [
 				{
@@ -442,6 +476,9 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		_accessToken: string,
 		_fields?: string[],
 	): Promise<ThreadsLocation> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to get location"));
+		}
 		return Promise.resolve({
 			id: locationId,
 			name: "Test Location",

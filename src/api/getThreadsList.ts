@@ -20,7 +20,6 @@ export async function getThreadsList(
 ): Promise<ThreadsListResponse> {
 	const api = getAPI();
 	if (api) {
-		// Use mock API
 		return api.getThreadsList(userId, accessToken, options, fields);
 	}
 	const fieldList = (fields ?? USER_THREADS_FIELDS).join(",");
@@ -40,7 +39,10 @@ export async function getThreadsList(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to retrieve threads list: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to retrieve threads list (${response.status}): ${errorBody}`,
+		);
 	}
 
 	return await response.json();

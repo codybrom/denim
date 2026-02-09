@@ -10,16 +10,30 @@ import { THREADS_API_BASE_URL } from "../constants.ts";
 export async function checkContainerStatus(
 	containerId: string,
 	accessToken: string,
-): Promise<{ status: string; error_message?: string }> {
+): Promise<{
+	status: "EXPIRED" | "ERROR" | "FINISHED" | "IN_PROGRESS" | "PUBLISHED";
+	error_message?: string;
+}> {
 	const url = new URL(`${THREADS_API_BASE_URL}/${containerId}`);
 	url.searchParams.append("fields", "status,error_message");
 	url.searchParams.append("access_token", accessToken);
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to check container status: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to check container status (${response.status}): ${errorBody}`,
+		);
 	}
 
 	const data = await response.json();
-	return { status: data.status, error_message: data.error_message };
+	return {
+		status: data.status as
+			| "EXPIRED"
+			| "ERROR"
+			| "FINISHED"
+			| "IN_PROGRESS"
+			| "PUBLISHED",
+		error_message: data.error_message,
+	};
 }

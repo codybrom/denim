@@ -24,7 +24,6 @@ export async function publishThreadsContainer(
 ): Promise<string | { id: string; permalink: string }> {
 	const api = getAPI();
 	if (api) {
-		// Use mock API
 		return api.publishThreadsContainer(
 			userId,
 			accessToken,
@@ -33,11 +32,14 @@ export async function publishThreadsContainer(
 		);
 	}
 	try {
-		// Poll container status until FINISHED before publishing
+		// Wait 30 seconds before first status check (per API docs recommendation)
+		await new Promise((resolve) => setTimeout(resolve, 30_000));
+
+		// Poll container status once per minute, for up to 5 minutes (per API docs)
 		let result = await checkContainerStatus(containerId, accessToken);
 		let attempts = 0;
 		const maxAttempts = 5;
-		const initialDelay = 500; // 0.5 seconds
+		const pollInterval = 60_000; // 1 minute
 
 		while (
 			result.status !== "FINISHED" &&
@@ -50,8 +52,7 @@ export async function publishThreadsContainer(
 					}`,
 				);
 			}
-			const delay = initialDelay * Math.pow(2, attempts);
-			await new Promise((resolve) => setTimeout(resolve, delay));
+			await new Promise((resolve) => setTimeout(resolve, pollInterval));
 			result = await checkContainerStatus(containerId, accessToken);
 			attempts++;
 		}
@@ -78,8 +79,9 @@ export async function publishThreadsContainer(
 		});
 
 		if (!publishResponse.ok) {
+			const errorBody = await publishResponse.text();
 			throw new Error(
-				`Failed to publish Threads container: ${publishResponse.statusText}`,
+				`Failed to publish Threads container (${publishResponse.status}): ${errorBody}`,
 			);
 		}
 
@@ -96,8 +98,10 @@ export async function publishThreadsContainer(
 		return publishData.id;
 	} catch (error) {
 		if (error instanceof Error) {
-			throw new Error(`Failed to publish Threads container: ${error.message}`);
+			throw error;
 		}
-		throw error;
+		throw new Error(
+			`Failed to publish Threads container: ${String(error)}`,
+		);
 	}
 }

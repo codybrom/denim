@@ -34,19 +34,21 @@ export async function getPublishingLimit(
 ): Promise<PublishingLimit> {
 	const api = getAPI();
 	if (api) {
-		// Use mock API
 		return api.getPublishingLimit(userId, accessToken, fields);
 	}
 	const fieldList = (fields ?? DEFAULT_FIELDS).join(",");
-	const url = `${THREADS_API_BASE_URL}/${userId}/threads_publishing_limit`;
-	const params = new URLSearchParams({
-		access_token: accessToken,
-		fields: fieldList,
-	});
+	const url = new URL(
+		`${THREADS_API_BASE_URL}/${userId}/threads_publishing_limit`,
+	);
+	url.searchParams.append("access_token", accessToken);
+	url.searchParams.append("fields", fieldList);
 
-	const response = await fetch(`${url}?${params}`);
+	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to get publishing limit: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to get publishing limit (${response.status}): ${errorBody}`,
+		);
 	}
 
 	const data = await response.json();

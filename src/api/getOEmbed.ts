@@ -31,7 +31,10 @@ export async function getOEmbed(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to get oEmbed: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to get oEmbed (${response.status}): ${errorBody}`,
+		);
 	}
 
 	return await response.json();

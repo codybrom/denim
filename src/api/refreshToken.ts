@@ -23,7 +23,10 @@ export async function refreshToken(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to refresh token: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to refresh token (${response.status}): ${errorBody}`,
+		);
 	}
 
 	return await response.json();

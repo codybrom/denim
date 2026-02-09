@@ -29,7 +29,10 @@ export async function getMediaInsights(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to get media insights: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to get media insights (${response.status}): ${errorBody}`,
+		);
 	}
 
 	return await response.json();

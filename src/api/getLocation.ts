@@ -28,7 +28,10 @@ export async function getLocation(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to get location: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to get location (${response.status}): ${errorBody}`,
+		);
 	}
 
 	return await response.json();

@@ -2,8 +2,6 @@ import { THREADS_API_BASE_URL, USER_THREADS_FIELDS } from "../constants.ts";
 import type { PaginationOptions, ThreadsListResponse } from "../types.ts";
 import { getAPI } from "../utils/getAPI.ts";
 
-const DEFAULT_FIELDS = USER_THREADS_FIELDS;
-
 /**
  * Retrieves a list of ghost posts created by a user.
  *
@@ -25,7 +23,7 @@ export async function getGhostPosts(
 		return api.getGhostPosts(userId, accessToken, options, fields);
 	}
 
-	const fieldList = (fields ?? DEFAULT_FIELDS).join(",");
+	const fieldList = (fields ?? USER_THREADS_FIELDS).join(",");
 	const url = new URL(`${THREADS_API_BASE_URL}/${userId}/ghost_posts`);
 	url.searchParams.append("fields", fieldList);
 	url.searchParams.append("access_token", accessToken);
@@ -42,7 +40,10 @@ export async function getGhostPosts(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to get ghost posts: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to get ghost posts (${response.status}): ${errorBody}`,
+		);
 	}
 
 	return await response.json();

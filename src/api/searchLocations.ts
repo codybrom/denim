@@ -36,7 +36,10 @@ export async function searchLocations(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to search locations: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to search locations (${response.status}): ${errorBody}`,
+		);
 	}
 
 	return await response.json();

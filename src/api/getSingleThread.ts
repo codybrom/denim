@@ -18,7 +18,6 @@ export async function getSingleThread(
 ): Promise<ThreadsPost> {
 	const api = getAPI();
 	if (api) {
-		// Use mock API
 		return api.getSingleThread(mediaId, accessToken, fields);
 	}
 	const fieldList = (fields ?? SINGLE_THREAD_FIELDS).join(",");
@@ -28,7 +27,10 @@ export async function getSingleThread(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to retrieve thread: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to retrieve thread (${response.status}): ${errorBody}`,
+		);
 	}
 
 	return await response.json();

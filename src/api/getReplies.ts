@@ -41,7 +41,10 @@ export async function getReplies(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to get replies: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to get replies (${response.status}): ${errorBody}`,
+		);
 	}
 
 	return await response.json();

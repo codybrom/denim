@@ -25,6 +25,7 @@ import {
 	lookupProfile,
 	manageReply,
 	type MockThreadsAPI,
+	MockThreadsAPIImpl,
 	publishThreadsContainer,
 	refreshToken,
 	repost,
@@ -32,7 +33,6 @@ import {
 	searchLocations,
 	type ThreadsPostRequest,
 } from "./mod.ts";
-import { MockThreadsAPIImpl } from "./src/utils/mock_threads_api.ts";
 
 let mockAPI: MockThreadsAPIImpl;
 
@@ -46,13 +46,6 @@ const validUrl = {
 
 const invalidUrl = {
 	link: "invalid_url",
-	failedImage: "https://example.com/404.jpg",
-	failedMedia: "https://example.com/404.jpg",
-	incompatibleFormat:
-		"https://svs.gsfc.nasa.gov/vis/a030000/a030800/a030877/frames/5760x3240_16x9_01p/BlackMarble_2016_1200m_africa_s.tif",
-	oversizedImage:
-		"https://svs.gsfc.nasa.gov/vis/a030000/a030800/a030877/frames/5760x3240_16x9_01p/BlackMarble_2016_1200m_africa_s_labeled.png",
-	oversizedVideo: "https://example.com/invalid.mp4",
 };
 
 function setupMockAPI() {
@@ -65,8 +58,6 @@ function teardownMockAPI() {
 }
 
 Deno.test("Denim API Tests", async (t) => {
-	setupMockAPI();
-
 	// ─── createThreadsContainer ──────────────────────────────────────────────
 
 	await t.step("createThreadsContainer", async (t) => {
@@ -544,67 +535,111 @@ Deno.test("Denim API Tests", async (t) => {
 			assertEquals(itemId.length > 0, true);
 			teardownMockAPI();
 		});
+
+		await t.step("should throw error on failure", async () => {
+			setupMockAPI();
+			mockAPI.setErrorMode(true);
+			await assertRejects(
+				() =>
+					createCarouselItem({
+						userId: "12345",
+						accessToken: "token",
+						mediaType: "IMAGE" as const,
+						imageUrl: validUrl.image,
+					}),
+				Error,
+				"Failed to create carousel item",
+			);
+			teardownMockAPI();
+		});
 	});
 
 	// ─── getThreadsList ──────────────────────────────────────────────────────
 
-	await t.step("getThreadsList", async () => {
-		setupMockAPI();
-		const userId = "12345";
-		const accessToken = "valid_token";
+	await t.step("getThreadsList", async (t) => {
+		await t.step("should return threads with data", async () => {
+			setupMockAPI();
+			const userId = "12345";
+			const accessToken = "valid_token";
 
-		await createThreadsContainer({
-			userId,
-			accessToken,
-			mediaType: "TEXT",
-			text: "Test post 1",
-		});
-		await createThreadsContainer({
-			userId,
-			accessToken,
-			mediaType: "TEXT",
-			text: "Test post 2",
+			await createThreadsContainer({
+				userId,
+				accessToken,
+				mediaType: "TEXT",
+				text: "Test post 1",
+			});
+			await createThreadsContainer({
+				userId,
+				accessToken,
+				mediaType: "TEXT",
+				text: "Test post 2",
+			});
+
+			const result = await getThreadsList(userId, accessToken);
+			assertEquals(Array.isArray(result.data), true);
+			assertEquals(result.data.length > 0, true);
+			assertEquals(typeof result.data[0].id, "string");
+			assertEquals(result.data[0].text, "Test post 1");
+			assertEquals(result.data[1].text, "Test post 2");
+			if (result.paging) {
+				assertEquals(typeof result.paging.cursors.before, "string");
+				assertEquals(typeof result.paging.cursors.after, "string");
+			}
+			teardownMockAPI();
 		});
 
-		const result = await getThreadsList(userId, accessToken);
-		assertEquals(Array.isArray(result.data), true);
-		assertEquals(result.data.length > 0, true);
-		assertEquals(result.data[0].text, "Test post 1");
-		assertEquals(result.data[1].text, "Test post 2");
-		if (result.paging) {
-			assertEquals(typeof result.paging.cursors.before, "string");
-			assertEquals(typeof result.paging.cursors.after, "string");
-		}
-		teardownMockAPI();
+		await t.step("should throw error on failure", async () => {
+			setupMockAPI();
+			mockAPI.setErrorMode(true);
+			await assertRejects(
+				() => getThreadsList("12345", "token"),
+				Error,
+				"Failed to retrieve threads list",
+			);
+			teardownMockAPI();
+		});
 	});
 
 	// ─── getSingleThread ─────────────────────────────────────────────────────
 
-	await t.step("getSingleThread", async () => {
-		setupMockAPI();
-		const userId = "12345";
-		const accessToken = "valid_token";
-		const testText = "Test post for getSingleThread";
+	await t.step("getSingleThread", async (t) => {
+		await t.step("should return thread data", async () => {
+			setupMockAPI();
+			const userId = "12345";
+			const accessToken = "valid_token";
+			const testText = "Test post for getSingleThread";
 
-		const containerId = await createThreadsContainer({
-			userId,
-			accessToken,
-			mediaType: "TEXT",
-			text: testText,
+			const containerId = await createThreadsContainer({
+				userId,
+				accessToken,
+				mediaType: "TEXT",
+				text: testText,
+			});
+			const mediaId = await publishThreadsContainer(
+				userId,
+				accessToken,
+				containerId,
+			);
+
+			const result = await getSingleThread(
+				typeof mediaId === "string" ? mediaId : mediaId.id,
+				accessToken,
+			);
+			assertEquals(typeof result.id, "string");
+			assertEquals(result.text, testText);
+			teardownMockAPI();
 		});
-		const mediaId = await publishThreadsContainer(
-			userId,
-			accessToken,
-			containerId,
-		);
 
-		const result = await getSingleThread(
-			typeof mediaId === "string" ? mediaId : mediaId.id,
-			accessToken,
-		);
-		assertEquals(typeof result.id, "string");
-		assertEquals(result.text, testText);
-		teardownMockAPI();
+		await t.step("should throw error on failure", async () => {
+			setupMockAPI();
+			mockAPI.setErrorMode(true);
+			await assertRejects(
+				() => getSingleThread("media_123", "token"),
+				Error,
+				"Failed to retrieve thread",
+			);
+			teardownMockAPI();
+		});
 	});
 
 	// ─── getPublishingLimit ──────────────────────────────────────────────────
@@ -762,59 +797,148 @@ Deno.test("Denim API Tests", async (t) => {
 
 	// ─── getProfilePosts ─────────────────────────────────────────────────────
 
-	await t.step("getProfilePosts", async () => {
-		setupMockAPI();
-		await createThreadsContainer({
-			userId: "12345",
-			accessToken: "token",
-			mediaType: "TEXT",
-			text: "Profile post",
+	await t.step("getProfilePosts", async (t) => {
+		await t.step("should return profile posts", async () => {
+			setupMockAPI();
+			await createThreadsContainer({
+				userId: "12345",
+				accessToken: "token",
+				mediaType: "TEXT",
+				text: "Profile post",
+			});
+			const result = await getProfilePosts("token", "testuser");
+			assertEquals(Array.isArray(result.data), true);
+			assertEquals(result.data.length > 0, true);
+			assertEquals(typeof result.data[0].id, "string");
+			teardownMockAPI();
 		});
-		const result = await getProfilePosts("token", "testuser");
-		assertEquals(Array.isArray(result.data), true);
-		teardownMockAPI();
+
+		await t.step("should throw error on failure", async () => {
+			setupMockAPI();
+			mockAPI.setErrorMode(true);
+			await assertRejects(
+				() => getProfilePosts("token", "testuser"),
+				Error,
+				"Failed to get profile posts",
+			);
+			teardownMockAPI();
+		});
 	});
 
 	// ─── getGhostPosts ───────────────────────────────────────────────────────
 
-	await t.step("getGhostPosts", async () => {
-		setupMockAPI();
-		await createThreadsContainer({
-			userId: "12345",
-			accessToken: "token",
-			mediaType: "TEXT",
-			text: "Ghost post",
+	await t.step("getGhostPosts", async (t) => {
+		await t.step("should return ghost posts", async () => {
+			setupMockAPI();
+			await createThreadsContainer({
+				userId: "12345",
+				accessToken: "token",
+				mediaType: "TEXT",
+				text: "Ghost post",
+			});
+			const result = await getGhostPosts("12345", "token");
+			assertEquals(Array.isArray(result.data), true);
+			assertEquals(result.data.length > 0, true);
+			assertEquals(typeof result.data[0].id, "string");
+			teardownMockAPI();
 		});
-		const result = await getGhostPosts("12345", "token");
-		assertEquals(Array.isArray(result.data), true);
-		teardownMockAPI();
+
+		await t.step("should throw error on failure", async () => {
+			setupMockAPI();
+			mockAPI.setErrorMode(true);
+			await assertRejects(
+				() => getGhostPosts("12345", "token"),
+				Error,
+				"Failed to get ghost posts",
+			);
+			teardownMockAPI();
+		});
 	});
 
 	// ─── getUserReplies ──────────────────────────────────────────────────────
 
-	await t.step("getUserReplies", async () => {
-		setupMockAPI();
-		const result = await getUserReplies("12345", "token");
-		assertEquals(Array.isArray(result.data), true);
-		teardownMockAPI();
+	await t.step("getUserReplies", async (t) => {
+		await t.step("should return user replies with paging", async () => {
+			setupMockAPI();
+			const result = await getUserReplies("12345", "token");
+			assertEquals(Array.isArray(result.data), true);
+			if (result.paging) {
+				assertEquals(typeof result.paging.cursors.before, "string");
+				assertEquals(typeof result.paging.cursors.after, "string");
+			}
+			teardownMockAPI();
+		});
+
+		await t.step("should throw error on failure", async () => {
+			setupMockAPI();
+			mockAPI.setErrorMode(true);
+			await assertRejects(
+				() => getUserReplies("12345", "token"),
+				Error,
+				"Failed to get user replies",
+			);
+			teardownMockAPI();
+		});
 	});
 
 	// ─── getReplies ──────────────────────────────────────────────────────────
 
-	await t.step("getReplies", async () => {
-		setupMockAPI();
-		const result = await getReplies("media_123", "token");
-		assertEquals(Array.isArray(result.data), true);
-		teardownMockAPI();
+	await t.step("getReplies", async (t) => {
+		await t.step("should return replies", async () => {
+			setupMockAPI();
+			await createThreadsContainer({
+				userId: "12345",
+				accessToken: "token",
+				mediaType: "TEXT",
+				text: "Post with replies",
+			});
+			const result = await getReplies("media_123", "token");
+			assertEquals(Array.isArray(result.data), true);
+			assertEquals(result.data.length > 0, true);
+			assertEquals(typeof result.data[0].id, "string");
+			teardownMockAPI();
+		});
+
+		await t.step("should throw error on failure", async () => {
+			setupMockAPI();
+			mockAPI.setErrorMode(true);
+			await assertRejects(
+				() => getReplies("media_123", "token"),
+				Error,
+				"Failed to get replies",
+			);
+			teardownMockAPI();
+		});
 	});
 
 	// ─── getConversation ─────────────────────────────────────────────────────
 
-	await t.step("getConversation", async () => {
-		setupMockAPI();
-		const result = await getConversation("media_123", "token");
-		assertEquals(Array.isArray(result.data), true);
-		teardownMockAPI();
+	await t.step("getConversation", async (t) => {
+		await t.step("should return conversation", async () => {
+			setupMockAPI();
+			await createThreadsContainer({
+				userId: "12345",
+				accessToken: "token",
+				mediaType: "TEXT",
+				text: "Conversation root",
+			});
+			const result = await getConversation("media_123", "token");
+			assertEquals(Array.isArray(result.data), true);
+			assertEquals(result.data.length > 0, true);
+			assertEquals(typeof result.data[0].id, "string");
+			teardownMockAPI();
+		});
+
+		await t.step("should throw error on failure", async () => {
+			setupMockAPI();
+			mockAPI.setErrorMode(true);
+			await assertRejects(
+				() => getConversation("media_123", "token"),
+				Error,
+				"Failed to get conversation",
+			);
+			teardownMockAPI();
+		});
 	});
 
 	// ─── manageReply ─────────────────────────────────────────────────────────
@@ -833,15 +957,47 @@ Deno.test("Denim API Tests", async (t) => {
 			assertEquals(result.success, true);
 			teardownMockAPI();
 		});
+
+		await t.step("should throw error on failure", async () => {
+			setupMockAPI();
+			mockAPI.setErrorMode(true);
+			await assertRejects(
+				() => manageReply("reply_123", "token", true),
+				Error,
+				"Failed to manage reply",
+			);
+			teardownMockAPI();
+		});
 	});
 
 	// ─── getMentions ─────────────────────────────────────────────────────────
 
-	await t.step("getMentions", async () => {
-		setupMockAPI();
-		const result = await getMentions("12345", "token");
-		assertEquals(Array.isArray(result.data), true);
-		teardownMockAPI();
+	await t.step("getMentions", async (t) => {
+		await t.step("should return mentions", async () => {
+			setupMockAPI();
+			await createThreadsContainer({
+				userId: "12345",
+				accessToken: "token",
+				mediaType: "TEXT",
+				text: "Mentioned post",
+			});
+			const result = await getMentions("12345", "token");
+			assertEquals(Array.isArray(result.data), true);
+			assertEquals(result.data.length > 0, true);
+			assertEquals(typeof result.data[0].id, "string");
+			teardownMockAPI();
+		});
+
+		await t.step("should throw error on failure", async () => {
+			setupMockAPI();
+			mockAPI.setErrorMode(true);
+			await assertRejects(
+				() => getMentions("12345", "token"),
+				Error,
+				"Failed to get mentions",
+			);
+			teardownMockAPI();
+		});
 	});
 
 	// ─── getMediaInsights ────────────────────────────────────────────────────
@@ -899,38 +1055,85 @@ Deno.test("Denim API Tests", async (t) => {
 
 	// ─── searchKeyword ───────────────────────────────────────────────────────
 
-	await t.step("searchKeyword", async () => {
-		setupMockAPI();
-		const result = await searchKeyword("token", {
-			q: "test query",
-			search_type: "TOP",
+	await t.step("searchKeyword", async (t) => {
+		await t.step("should return search results", async () => {
+			setupMockAPI();
+			await createThreadsContainer({
+				userId: "12345",
+				accessToken: "token",
+				mediaType: "TEXT",
+				text: "Searchable post",
+			});
+			const result = await searchKeyword("token", {
+				q: "test query",
+				search_type: "TOP",
+			});
+			assertEquals(Array.isArray(result.data), true);
+			assertEquals(result.data.length > 0, true);
+			assertEquals(typeof result.data[0].id, "string");
+			teardownMockAPI();
 		});
-		assertEquals(Array.isArray(result.data), true);
-		teardownMockAPI();
+
+		await t.step("should throw error on failure", async () => {
+			setupMockAPI();
+			mockAPI.setErrorMode(true);
+			await assertRejects(
+				() => searchKeyword("token", { q: "test" }),
+				Error,
+				"Failed to search keywords",
+			);
+			teardownMockAPI();
+		});
 	});
 
 	// ─── searchLocations ─────────────────────────────────────────────────────
 
-	await t.step("searchLocations", async () => {
-		setupMockAPI();
-		const result = await searchLocations("token", {
-			query: "San Francisco",
+	await t.step("searchLocations", async (t) => {
+		await t.step("should return location results", async () => {
+			setupMockAPI();
+			const result = await searchLocations("token", {
+				query: "San Francisco",
+			});
+			assertEquals(Array.isArray(result.data), true);
+			assertEquals(result.data.length > 0, true);
+			assertEquals(result.data[0].name, "Test Location");
+			teardownMockAPI();
 		});
-		assertEquals(Array.isArray(result.data), true);
-		assertEquals(result.data.length > 0, true);
-		assertEquals(result.data[0].name, "Test Location");
-		teardownMockAPI();
+
+		await t.step("should throw error on failure", async () => {
+			setupMockAPI();
+			mockAPI.setErrorMode(true);
+			await assertRejects(
+				() => searchLocations("token", { query: "test" }),
+				Error,
+				"Failed to search locations",
+			);
+			teardownMockAPI();
+		});
 	});
 
 	// ─── getLocation ─────────────────────────────────────────────────────────
 
-	await t.step("getLocation", async () => {
-		setupMockAPI();
-		const result = await getLocation("loc_123", "token");
-		assertEquals(result.id, "loc_123");
-		assertEquals(result.name, "Test Location");
-		assertEquals(typeof result.latitude, "number");
-		teardownMockAPI();
+	await t.step("getLocation", async (t) => {
+		await t.step("should return location data", async () => {
+			setupMockAPI();
+			const result = await getLocation("loc_123", "token");
+			assertEquals(result.id, "loc_123");
+			assertEquals(result.name, "Test Location");
+			assertEquals(typeof result.latitude, "number");
+			teardownMockAPI();
+		});
+
+		await t.step("should throw error on failure", async () => {
+			setupMockAPI();
+			mockAPI.setErrorMode(true);
+			await assertRejects(
+				() => getLocation("loc_123", "token"),
+				Error,
+				"Failed to get location",
+			);
+			teardownMockAPI();
+		});
 	});
 
 	// ─── exchangeCodeForToken ────────────────────────────────────────────────

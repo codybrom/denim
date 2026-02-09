@@ -37,7 +37,6 @@ export async function createCarouselItem(
 ): Promise<string> {
 	const api = getAPI();
 	if (api) {
-		// Use mock API
 		return api.createCarouselItem(request);
 	}
 	if (request.mediaType !== "IMAGE" && request.mediaType !== "VIDEO") {
@@ -57,10 +56,10 @@ export async function createCarouselItem(
 		access_token: request.accessToken,
 		media_type: request.mediaType,
 		is_carousel_item: "true",
-		...(request.imageUrl && { image_url: request.imageUrl }),
-		...(request.videoUrl && { video_url: request.videoUrl }),
-		...(request.altText && { alt_text: request.altText }),
 	});
+	if (request.imageUrl) body.append("image_url", request.imageUrl);
+	if (request.videoUrl) body.append("video_url", request.videoUrl);
+	if (request.altText) body.append("alt_text", request.altText);
 
 	const response = await fetch(url, {
 		method: "POST",
@@ -74,7 +73,7 @@ export async function createCarouselItem(
 
 	if (!response.ok) {
 		throw new Error(
-			`Failed to create carousel item: ${response.statusText}. Details: ${responseText}`,
+			`Failed to create carousel item (${response.status}): ${responseText}`,
 		);
 	}
 

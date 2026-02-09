@@ -26,7 +26,10 @@ export async function exchangeToken(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to exchange token: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to exchange token (${response.status}): ${errorBody}`,
+		);
 	}
 
 	return await response.json();

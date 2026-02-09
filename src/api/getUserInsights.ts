@@ -44,7 +44,10 @@ export async function getUserInsights(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to get user insights: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to get user insights (${response.status}): ${errorBody}`,
+		);
 	}
 
 	return await response.json();

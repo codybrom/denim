@@ -18,18 +18,18 @@ export async function deleteThread(
 		return api.deleteThread(mediaId, accessToken);
 	}
 
-	const url = `${THREADS_API_BASE_URL}/${mediaId}`;
-	const params = new URLSearchParams({
-		access_token: accessToken,
-	});
+	const url = new URL(`${THREADS_API_BASE_URL}/${mediaId}`);
+	url.searchParams.append("access_token", accessToken);
 
-	const response = await fetch(`${url}?${params}`, {
+	const response = await fetch(url.toString(), {
 		method: "DELETE",
 	});
 
 	if (!response.ok) {
 		const responseText = await response.text();
-		throw new Error(`Failed to delete thread: ${responseText}`);
+		throw new Error(
+			`Failed to delete thread (${response.status}): ${responseText}`,
+		);
 	}
 
 	return await response.json();

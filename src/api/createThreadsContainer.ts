@@ -27,7 +27,6 @@ export async function createThreadsContainer(
 ): Promise<string> {
 	const api = getAPI();
 	if (api) {
-		// Use mock API
 		return api.createThreadsContainer(request);
 	}
 	try {

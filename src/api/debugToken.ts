@@ -25,7 +25,10 @@ export async function debugToken(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to debug token: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to debug token (${response.status}): ${errorBody}`,
+		);
 	}
 
 	return await response.json();

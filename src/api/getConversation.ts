@@ -41,7 +41,10 @@ export async function getConversation(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to get conversation: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to get conversation (${response.status}): ${errorBody}`,
+		);
 	}
 
 	return await response.json();

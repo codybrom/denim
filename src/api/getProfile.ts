@@ -38,7 +38,8 @@ export async function getProfile(
 
 	const response = await fetch(url.toString());
 	if (!response.ok) {
-		throw new Error(`Failed to get profile: ${response.statusText}`);
+		const errorBody = await response.text();
+		throw new Error(`Failed to get profile (${response.status}): ${errorBody}`);
 	}
 
 	return await response.json();

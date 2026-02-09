@@ -3,9 +3,6 @@
 // ─── Media & Reply Control ───────────────────────────────────────────────────
 
 /**
- * Represents the types of media that can be posted on Threads.
- */
-/**
  * Media types used when creating posts.
  */
 export type MediaType = "TEXT" | "IMAGE" | "VIDEO" | "CAROUSEL";
@@ -15,10 +12,11 @@ export type MediaType = "TEXT" | "IMAGE" | "VIDEO" | "CAROUSEL";
  * Responses use TEXT_POST (not TEXT) and CAROUSEL_ALBUM (not CAROUSEL).
  */
 export type ResponseMediaType =
-	| MediaType
-	| "GIF"
 	| "TEXT_POST"
+	| "IMAGE"
+	| "VIDEO"
 	| "CAROUSEL_ALBUM"
+	| "GIF"
 	| "REPOST_FACADE"
 	| "AUDIO";
 
@@ -36,6 +34,7 @@ export type ReplyControl =
 
 /**
  * Options for poll attachments when creating a post.
+ * Properties use snake_case to match the Threads API payload format directly.
  */
 export interface PollAttachmentInput {
 	/** First poll option (required) */
@@ -50,6 +49,7 @@ export interface PollAttachmentInput {
 
 /**
  * Represents a text entity for spoiler/styling annotations.
+ * Properties use snake_case to match the Threads API payload format directly.
  */
 export interface TextEntity {
 	/** The type of entity (e.g., "spoiler") */
@@ -62,6 +62,7 @@ export interface TextEntity {
 
 /**
  * Input for text attachments (long-form text posts).
+ * Properties use snake_case to match the Threads API payload format directly.
  */
 export interface TextAttachmentInput {
 	/** The plaintext content */
@@ -78,6 +79,7 @@ export interface TextAttachmentInput {
 
 /**
  * Input for GIF attachments.
+ * Properties use snake_case to match the Threads API payload format directly.
  */
 export interface GifAttachment {
 	/** The GIF ID from the provider */
@@ -519,6 +521,7 @@ export interface UserInsightsOptions {
 
 /**
  * Options for keyword/tag search.
+ * Properties use snake_case to match the Threads API payload format directly.
  */
 export interface KeywordSearchOptions extends PaginationOptions {
 	/** The search query string (required) */

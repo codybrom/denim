@@ -40,7 +40,7 @@ export const USER_THREADS_FIELDS = [
 	"text_attachment",
 	"ghost_post_status",
 	"ghost_post_expiration_timestamp",
-];
+] as const;
 
 /** Fields for single thread retrieval (GET /{media-id}) */
 export const SINGLE_THREAD_FIELDS = [
@@ -50,7 +50,7 @@ export const SINGLE_THREAD_FIELDS = [
 	"root_post",
 	"replied_to",
 	"hide_status",
-];
+] as const;
 
 /** Fields for reply/conversation endpoints */
 export const REPLY_FIELDS = [
@@ -65,7 +65,7 @@ export const REPLY_FIELDS = [
 	"reposted_post",
 	"gif_url",
 	"topic_tag",
-];
+] as const;
 
 /** Fields for location endpoints */
 export const LOCATION_FIELDS = [
@@ -77,4 +77,4 @@ export const LOCATION_FIELDS = [
 	"latitude",
 	"longitude",
 	"postal_code",
-];
+] as const;
