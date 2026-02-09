@@ -49,7 +49,7 @@ export async function createThreadsContainer(
 		if (request.allowlistedCountryCodes) {
 			body.append(
 				"allowlisted_country_codes",
-				request.allowlistedCountryCodes.join(","),
+				JSON.stringify(request.allowlistedCountryCodes),
 			);
 		}
 

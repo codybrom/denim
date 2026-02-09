@@ -26,41 +26,40 @@ import {
 	publishThreadsContainer,
 } from "@codybrom/denim";
 
-const container = await createThreadsContainer({
+const containerId = await createThreadsContainer({
 	userId: "YOUR_USER_ID",
 	accessToken: "YOUR_ACCESS_TOKEN",
 	mediaType: "TEXT",
 	text: "Hello from Denim!",
 });
 
-const containerId = typeof container === "string" ? container : container.id;
 await publishThreadsContainer("YOUR_USER_ID", "YOUR_ACCESS_TOKEN", containerId);
 ```
 
 `createThreadsContainer(request)` takes a `ThreadsPostRequest` and returns the
-container ID (or `{ id, permalink }`). The request requires `userId`,
-`accessToken`, `mediaType`, and usually `text`. Optional fields control the post
-type:
+container ID string. The request requires `userId`, `accessToken`, `mediaType`,
+and usually `text`. Optional fields control the post type:
 
-| Field             | Type       | Purpose                                                      |
-| ----------------- | ---------- | ------------------------------------------------------------ |
-| `imageUrl`        | `string`   | Image URL (for `IMAGE` or `CAROUSEL` items)                  |
-| `videoUrl`        | `string`   | Video URL (for `VIDEO` or `CAROUSEL` items)                  |
-| `altText`         | `string`   | Alt text for images and videos                               |
-| `linkAttachment`  | `string`   | URL to attach to a `TEXT` post                               |
-| `replyControl`    | `string`   | `"everyone"`, `"accounts_you_follow"`, or `"mentioned_only"` |
-| `replyToId`       | `string`   | Post ID to reply to                                          |
-| `quotePostId`     | `string`   | Post ID to quote                                             |
-| `pollAttachment`  | `object`   | `{ option_a, option_b, option_c?, option_d? }`               |
-| `topicTag`        | `string`   | Topic tag for the post                                       |
-| `isGhostPost`     | `boolean`  | Make a ghost post (text only, expires in 24h)                |
-| `isSpoilerMedia`  | `boolean`  | Hide media behind a spoiler overlay                          |
-| `textEntities`    | `array`    | Text spoiler ranges: `[{ entity_type, offset, length }]`     |
-| `textAttachment`  | `object`   | Long-form text: `{ plaintext, link_attachment_url? }`        |
-| `gifAttachment`   | `object`   | GIF: `{ gif_id, provider }`                                  |
-| `locationId`      | `string`   | Location ID from `searchLocations`                           |
-| `children`        | `string[]` | Carousel item IDs from `createCarouselItem`                  |
-| `autoPublishText` | `boolean`  | Skip the publish step for text posts                         |
+| Field                     | Type       | Purpose                                                                                                       |
+| ------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
+| `imageUrl`                | `string`   | Image URL (for `IMAGE` or `CAROUSEL` items)                                                                   |
+| `videoUrl`                | `string`   | Video URL (for `VIDEO` or `CAROUSEL` items)                                                                   |
+| `altText`                 | `string`   | Alt text for images and videos                                                                                |
+| `linkAttachment`          | `string`   | URL to attach to a `TEXT` post                                                                                |
+| `replyControl`            | `string`   | `"everyone"`, `"accounts_you_follow"`, `"mentioned_only"`, `"parent_post_author_only"`, or `"followers_only"` |
+| `allowlistedCountryCodes` | `string[]` | ISO country codes to restrict post visibility                                                                 |
+| `replyToId`               | `string`   | Post ID to reply to                                                                                           |
+| `quotePostId`             | `string`   | Post ID to quote                                                                                              |
+| `pollAttachment`          | `object`   | `{ option_a, option_b, option_c?, option_d? }`                                                                |
+| `topicTag`                | `string`   | Topic tag for the post                                                                                        |
+| `isGhostPost`             | `boolean`  | Make a ghost post (text only, expires in 24h)                                                                 |
+| `isSpoilerMedia`          | `boolean`  | Hide media behind a spoiler overlay                                                                           |
+| `textEntities`            | `array`    | Text spoiler ranges: `[{ entity_type, offset, length }]`                                                      |
+| `textAttachment`          | `object`   | Long-form text: `{ plaintext, link_attachment_url? }`                                                         |
+| `gifAttachment`           | `object`   | GIF: `{ gif_id, provider }`                                                                                   |
+| `locationId`              | `string`   | Location ID from `searchLocations`                                                                            |
+| `children`                | `string[]` | Carousel item IDs from `createCarouselItem`                                                                   |
+| `autoPublishText`         | `boolean`  | Skip the publish step for text posts                                                                          |
 
 `publishThreadsContainer(userId, accessToken, containerId, getPermalink?)`
 publishes a container. Pass `true` for `getPermalink` to get `{ id, permalink }`
@@ -72,7 +71,7 @@ Takes the same request shape but `mediaType` must be `"IMAGE"` or `"VIDEO"`.
 `repost(mediaId, accessToken)` reposts an existing thread. Returns `{ id }`.
 
 `deleteThread(mediaId, accessToken)` deletes a thread. Returns
-`{ success: boolean }`.
+`{ success: boolean, deleted_id?: string }`.
 
 ## Retrieval
 
@@ -93,20 +92,22 @@ posts.
 `getProfile(userId, accessToken, fields?)` returns the authenticated user's
 `ThreadsProfile` (username, name, bio, profile picture, verification status).
 
-`lookupProfile(accessToken, username)` looks up any public profile by username.
-Returns a `PublicProfile` with follower counts and engagement stats. Requires
-`threads_profile_discovery` permission.
+`lookupProfile(accessToken, username, fields?)` looks up any public profile by
+username. Returns a `PublicProfile` with follower counts and engagement stats.
+Requires `threads_profile_discovery` permission.
 
 `getProfilePosts(accessToken, username, options?, fields?)` returns a public
 profile's posts.
 
 ## Replies
 
-`getReplies(mediaId, accessToken, options?, fields?)` returns direct replies to
-a post.
+`getReplies(mediaId, accessToken, options?, fields?, reverse?)` returns direct
+replies to a post. Pass `reverse: false` for chronological order (default is
+reverse chronological).
 
-`getConversation(mediaId, accessToken, options?, fields?)` returns the full
-conversation thread (replies and nested replies).
+`getConversation(mediaId, accessToken, options?, fields?, reverse?)` returns the
+full conversation thread (replies and nested replies). Pass `reverse: false` for
+chronological order.
 
 `getUserReplies(userId, accessToken, options?, fields?)` returns all replies
 made by a user.
@@ -131,15 +132,15 @@ metrics. Accepts an options object with `since`/`until` timestamps and
 
 ## Search & Locations
 
-`searchKeyword(accessToken, options)` searches posts by keyword or topic tag.
-Options:
+`searchKeyword(accessToken, options, fields?)` searches posts by keyword or
+topic tag. Options:
 `{ q, search_type?, search_mode?, media_type?, author_username?,
 ...pagination }`.
 Requires `threads_keyword_search` permission for searching beyond your own
 posts.
 
-`searchLocations(accessToken, options)` searches for locations by name or
-coordinates. Options: `{ query?, latitude?, longitude? }`. Returns location
+`searchLocations(accessToken, options, fields?)` searches for locations by name
+or coordinates. Options: `{ query?, latitude?, longitude? }`. Returns location
 objects with IDs you can pass to `createThreadsContainer` as `locationId`.
 
 `getLocation(locationId, accessToken, fields?)` returns details for a location

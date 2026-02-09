@@ -136,3 +136,10 @@ export { getOEmbed } from "./src/api/getOEmbed.ts";
 
 // ─── Rate Limits ─────────────────────────────────────────────────────────────
 export { getPublishingLimit } from "./src/api/getPublishingLimit.ts";
+
+// ─── Utilities ───────────────────────────────────────────────────────────────
+export { checkContainerStatus } from "./src/utils/checkContainerStatus.ts";
+export { validateRequest } from "./src/utils/validateRequest.ts";
+
+// ─── Testing ─────────────────────────────────────────────────────────────────
+export { MockThreadsAPIImpl } from "./src/utils/mock_threads_api.ts";

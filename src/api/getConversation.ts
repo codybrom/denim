@@ -22,7 +22,7 @@ export async function getConversation(
 ): Promise<ThreadsListResponse> {
 	const api = getAPI();
 	if (api) {
-		return api.getConversation(mediaId, accessToken, options, fields);
+		return api.getConversation(mediaId, accessToken, options, fields, reverse);
 	}
 
 	const fieldList = (fields ?? REPLY_FIELDS).join(",");

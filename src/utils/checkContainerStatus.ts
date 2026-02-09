@@ -11,10 +11,11 @@ export async function checkContainerStatus(
 	containerId: string,
 	accessToken: string,
 ): Promise<{ status: string; error_message?: string }> {
-	const url =
-		`${THREADS_API_BASE_URL}/${containerId}?fields=status,error_message&access_token=${accessToken}`;
+	const url = new URL(`${THREADS_API_BASE_URL}/${containerId}`);
+	url.searchParams.append("fields", "status,error_message");
+	url.searchParams.append("access_token", accessToken);
 
-	const response = await fetch(url);
+	const response = await fetch(url.toString());
 	if (!response.ok) {
 		throw new Error(`Failed to check container status: ${response.statusText}`);
 	}

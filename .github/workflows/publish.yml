@@ -24,6 +24,9 @@ jobs:
 
       - uses: denoland/setup-deno@v2
 
+      - name: Run checks
+        run: deno task check && deno task lint && deno task test
+
       - name: Publish package to JSR
         run: deno publish
 

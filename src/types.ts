@@ -112,8 +112,6 @@ export interface ThreadsPostRequest {
 	replyControl?: ReplyControl;
 	/** Array of carousel item IDs (required for CAROUSEL type) */
 	children?: string[];
-	/** Whether to return the permalink of the post (optional, default: false) */
-	getPermalink?: boolean;
 	/** ID of the post to reply to (optional) */
 	replyToId?: string;
 	/** ID of the post to quote (optional) */
@@ -806,6 +804,7 @@ export interface MockThreadsAPI {
 	lookupProfile(
 		accessToken: string,
 		username: string,
+		fields?: string[],
 	): Promise<PublicProfile>;
 
 	getProfilePosts(
@@ -834,6 +833,7 @@ export interface MockThreadsAPI {
 		accessToken: string,
 		options?: CursorPaginationOptions,
 		fields?: string[],
+		reverse?: boolean,
 	): Promise<ThreadsListResponse>;
 
 	getConversation(
@@ -841,6 +841,7 @@ export interface MockThreadsAPI {
 		accessToken: string,
 		options?: CursorPaginationOptions,
 		fields?: string[],
+		reverse?: boolean,
 	): Promise<ThreadsListResponse>;
 
 	manageReply(
@@ -872,11 +873,13 @@ export interface MockThreadsAPI {
 	searchKeyword(
 		accessToken: string,
 		options: KeywordSearchOptions,
+		fields?: string[],
 	): Promise<ThreadsListResponse>;
 
 	searchLocations(
 		accessToken: string,
 		options: LocationSearchOptions,
+		fields?: string[],
 	): Promise<{ data: ThreadsLocation[] }>;
 
 	getLocation(

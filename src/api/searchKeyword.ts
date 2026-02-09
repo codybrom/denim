@@ -45,7 +45,7 @@ export async function searchKeyword(
 ): Promise<ThreadsListResponse> {
 	const api = getAPI();
 	if (api) {
-		return api.searchKeyword(accessToken, options);
+		return api.searchKeyword(accessToken, options, fields);
 	}
 
 	const fieldList = (fields ?? DEFAULT_FIELDS).join(",");

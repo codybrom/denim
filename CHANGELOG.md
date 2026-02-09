@@ -15,6 +15,9 @@ and this project adheres to
   API returns `has_replies`. Input types still use camelCase.
 - `PublishingLimit` fields are optional (the API only returns requested fields)
 - `MockThreadsAPI` class renamed to `MockThreadsAPIImpl`
+- `createThreadsContainer` now always returns a `string` (container ID). The
+  previous `string | { id, permalink }` return type is removed; use
+  `publishThreadsContainer` with `getPermalink: true` to get the permalink.
 - Updated to Deno 2 conventions and `@std/assert` ^1.0.18
 
 ### Added

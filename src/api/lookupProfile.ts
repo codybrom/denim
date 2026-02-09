@@ -32,7 +32,7 @@ export async function lookupProfile(
 ): Promise<PublicProfile> {
 	const api = getAPI();
 	if (api) {
-		return api.lookupProfile(accessToken, username);
+		return api.lookupProfile(accessToken, username, fields);
 	}
 
 	const fieldList = (fields ?? DEFAULT_FIELDS).join(",");

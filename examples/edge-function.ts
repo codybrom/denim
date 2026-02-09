@@ -27,21 +27,13 @@ async function postToThreads(
 			delete request.imageUrl;
 		}
 
-		const containerResult = await createThreadsContainer(request);
-		console.log(
-			`Container created with ID: ${
-				typeof containerResult === "string"
-					? containerResult
-					: containerResult.id
-			}`,
-		);
+		const containerId = await createThreadsContainer(request);
+		console.log(`Container created with ID: ${containerId}`);
 
 		const publishedResult = await publishThreadsContainer(
 			request.userId,
 			request.accessToken,
-			typeof containerResult === "string"
-				? containerResult
-				: containerResult.id,
+			containerId,
 			true, // Get permalink
 		);
 
@@ -146,9 +138,7 @@ Deno.serve(async (req: Request) => {
 								videoUrl: item.videoUrl,
 								altText: item.altText,
 							});
-							postRequest.children.push(
-								typeof itemId === "string" ? itemId : itemId.id,
-							);
+							postRequest.children.push(itemId);
 						}
 					}
 					const publishedResult = await postToThreads(postRequest);
@@ -191,14 +181,10 @@ Deno.serve(async (req: Request) => {
 
   2. Send requests to <YOUR_FUNCTION_URI> with the following endpoints:
 
-     GET /health - Check the API health status
      GET /rate-limit?userId=YOUR_USER_ID&accessToken=YOUR_ACCESS_TOKEN - Check rate limit
      POST /post - Create and publish a post (see below for details)
 
   Example curl commands:
-
-  # Check API health
-  curl -X GET <YOUR_FUNCTION_URI>/health
 
   # Check rate limit
   curl -X GET "<YOUR_FUNCTION_URI>/rate-limit?userId=YOUR_USER_ID&accessToken=YOUR_ACCESS_TOKEN"

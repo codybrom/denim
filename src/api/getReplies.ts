@@ -22,7 +22,7 @@ export async function getReplies(
 ): Promise<ThreadsListResponse> {
 	const api = getAPI();
 	if (api) {
-		return api.getReplies(mediaId, accessToken, options, fields);
+		return api.getReplies(mediaId, accessToken, options, fields, reverse);
 	}
 
 	const fieldList = (fields ?? REPLY_FIELDS).join(",");

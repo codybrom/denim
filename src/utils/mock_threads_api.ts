@@ -238,6 +238,7 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 	lookupProfile(
 		_accessToken: string,
 		username: string,
+		_fields?: string[],
 	): Promise<PublicProfile> {
 		if (this.errorMode) {
 			return Promise.reject(new Error("Failed to look up profile"));
@@ -315,6 +316,7 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		_accessToken: string,
 		_options?: CursorPaginationOptions,
 		_fields?: string[],
+		_reverse?: boolean,
 	): Promise<ThreadsListResponse> {
 		return Promise.resolve({
 			data: Array.from(this.posts.values()).slice(0, 25),
@@ -329,6 +331,7 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		_accessToken: string,
 		_options?: CursorPaginationOptions,
 		_fields?: string[],
+		_reverse?: boolean,
 	): Promise<ThreadsListResponse> {
 		return Promise.resolve({
 			data: Array.from(this.posts.values()).slice(0, 25),
@@ -407,6 +410,7 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 	searchKeyword(
 		_accessToken: string,
 		_options: KeywordSearchOptions,
+		_fields?: string[],
 	): Promise<ThreadsListResponse> {
 		return Promise.resolve({
 			data: Array.from(this.posts.values()),
@@ -419,6 +423,7 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 	searchLocations(
 		_accessToken: string,
 		_options: LocationSearchOptions,
+		_fields?: string[],
 	): Promise<{ data: ThreadsLocation[] }> {
 		return Promise.resolve({
 			data: [

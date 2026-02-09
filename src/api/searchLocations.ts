@@ -18,7 +18,7 @@ export async function searchLocations(
 ): Promise<{ data: ThreadsLocation[] }> {
 	const api = getAPI();
 	if (api) {
-		return api.searchLocations(accessToken, options);
+		return api.searchLocations(accessToken, options, fields);
 	}
 
 	const fieldList = (fields ?? LOCATION_FIELDS).join(",");

@@ -50,5 +50,8 @@ export async function getPublishingLimit(
 	}
 
 	const data = await response.json();
+	if (!data.data?.[0]) {
+		throw new Error("No publishing limit data returned");
+	}
 	return data.data[0];
 }
