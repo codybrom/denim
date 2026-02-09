@@ -1,0 +1,51 @@
+import { REPLY_FIELDS, THREADS_API_BASE_URL } from "../constants.ts";
+import type { CursorPaginationOptions, ThreadsListResponse } from "../types.ts";
+import { getAPI } from "../utils/getAPI.ts";
+
+/**
+ * Retrieves the full conversation thread for a Threads media object.
+ *
+ * @param mediaId - The ID of the root Threads media object
+ * @param accessToken - The access token for authentication
+ * @param options - Optional pagination parameters
+ * @param fields - Optional array of fields to return
+ * @param reverse - Optional boolean to sort in reverse chronological order (default: true)
+ * @returns A Promise that resolves to the ThreadsListResponse
+ * @throws Will throw an error if the API request fails
+ */
+export async function getConversation(
+	mediaId: string,
+	accessToken: string,
+	options?: CursorPaginationOptions,
+	fields?: string[],
+	reverse?: boolean,
+): Promise<ThreadsListResponse> {
+	const api = getAPI();
+	if (api) {
+		return api.getConversation(mediaId, accessToken, options, fields, reverse);
+	}
+
+	const fieldList = (fields ?? REPLY_FIELDS).join(",");
+	const url = new URL(`${THREADS_API_BASE_URL}/${mediaId}/conversation`);
+	url.searchParams.append("fields", fieldList);
+	url.searchParams.append("access_token", accessToken);
+
+	if (reverse !== undefined) {
+		url.searchParams.append("reverse", String(reverse));
+	}
+
+	if (options) {
+		if (options.after) url.searchParams.append("after", options.after);
+		if (options.before) url.searchParams.append("before", options.before);
+	}
+
+	const response = await fetch(url.toString());
+	if (!response.ok) {
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to get conversation (${response.status}): ${errorBody}`,
+		);
+	}
+
+	return await response.json();
+}

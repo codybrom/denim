@@ -1,1 +1,17 @@
-Threads API.md
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+
+# Project notes
+/notes

@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - "**/*.!(ts|json|lock)"
-      - ".vscode/**"
+    paths:
+      - "src/**"
+      - "mod.ts"
+      - "deno.json"
+      - "deno.lock"
+      - "package.json"
 
 jobs:
   publish:
@@ -17,10 +20,15 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+
+      - uses: denoland/setup-deno@v2
+
+      - name: Run checks
+        run: deno task check && deno task lint && deno task test
 
       - name: Publish package to JSR
-        run: npx jsr publish
+        run: deno publish
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

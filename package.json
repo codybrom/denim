@@ -1,23 +1,23 @@
 {
-  "name": "@codybrom/denim",
-  "version": "1.3.6",
-  "description": "Typescript/Deno module to simplify posting to Threads",
-  "main": "mod.ts",
-  "directories": {
-    "example": "examples"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/codybrom/denim.git"
-  },
-  "keywords": [
-    "threads",
-    "threads-api"
-  ],
-  "author": "Cody Bromley",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/codybrom/denim/issues"
-  },
-  "homepage": "https://github.com/codybrom/denim#readme"
+	"name": "@codybrom/denim",
+	"version": "2.0.0",
+	"description": "A Deno/TypeScript library for the Threads API",
+	"main": "mod.ts",
+	"directories": {
+		"example": "examples"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/codybrom/denim.git"
+	},
+	"keywords": [
+		"threads",
+		"threads-api"
+	],
+	"author": "Cody Bromley",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/codybrom/denim/issues"
+	},
+	"homepage": "https://github.com/codybrom/denim#readme"
 }
