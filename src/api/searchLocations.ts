@@ -26,7 +26,7 @@ export async function searchLocations(
 	url.searchParams.append("access_token", accessToken);
 	url.searchParams.append("fields", fieldList);
 
-	if (options.query) url.searchParams.append("query", options.query);
+	if (options.query) url.searchParams.append("q", options.query);
 	if (options.latitude !== undefined) {
 		url.searchParams.append("latitude", options.latitude.toString());
 	}

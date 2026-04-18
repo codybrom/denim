@@ -1,6 +1,6 @@
 {
 	"name": "@codybrom/denim",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "A Deno/TypeScript library for the Threads API",
 	"exports": {
 		".": "./mod.ts"
