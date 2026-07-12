@@ -56,7 +56,7 @@ and usually `text`. Optional fields control the post type:
 | `isSpoilerMedia`          | `boolean`  | Hide media behind a spoiler overlay                                                                           |
 | `textEntities`            | `array`    | Text spoiler ranges: `[{ entity_type, offset, length }]`                                                      |
 | `textAttachment`          | `object`   | Long-form text: `{ plaintext, link_attachment_url? }`                                                         |
-| `gifAttachment`           | `object`   | GIF: `{ gif_id, provider }`                                                                                   |
+| `gifAttachment`           | `object`   | GIF: `{ gif_id, provider: "GIPHY" }`                                                                          |
 | `locationId`              | `string`   | Location ID from `searchLocations`                                                                            |
 | `children`                | `string[]` | Carousel item IDs from `createCarouselItem`                                                                   |
 | `autoPublishText`         | `boolean`  | Skip the publish step for text posts                                                                          |

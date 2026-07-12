@@ -141,7 +141,7 @@ Deno.test("Denim API Tests", async (t) => {
 				text: "Check this GIF!",
 				gifAttachment: {
 					gif_id: "abc123",
-					provider: "TENOR",
+					provider: "GIPHY",
 				},
 			};
 

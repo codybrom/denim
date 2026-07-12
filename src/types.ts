@@ -84,8 +84,8 @@ export interface TextAttachmentInput {
 export interface GifAttachment {
 	/** The GIF ID from the provider */
 	gif_id: string;
-	/** The GIF provider */
-	provider: "TENOR";
+	/** The GIF provider. GIPHY is currently the only supported provider (Tenor was retired March 31, 2026). */
+	provider: "GIPHY";
 }
 
 /**
