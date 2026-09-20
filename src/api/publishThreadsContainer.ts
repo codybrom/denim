@@ -92,6 +92,11 @@ export async function publishThreadsContainer(
 			return {
 				id: publishData.id,
 				permalink: threadData.permalink || "",
+				...(publishData.crossreshare_to_ig_status
+					? {
+						crossreshare_to_ig_status: publishData.crossreshare_to_ig_status,
+					}
+					: {}),
 			};
 		}
 

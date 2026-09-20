@@ -8,6 +8,7 @@
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 import type {
+	ApprovalStatus,
 	AuthCodeResponse,
 	CursorPaginationOptions,
 	DebugTokenInfo,
@@ -21,10 +22,12 @@ import type {
 	MockThreadsAPI,
 	OEmbedResponse,
 	PaginationOptions,
+	PendingRepliesOptions,
 	PollAttachment,
 	PollAttachmentInput,
 	PublicProfile,
 	PublishingLimit,
+	PublishResult,
 	QuotaConfig,
 	ReplyControl,
 	ResponseMediaType,
@@ -49,6 +52,7 @@ import type {
 } from "./src/types.ts";
 
 export type {
+	ApprovalStatus,
 	AuthCodeResponse,
 	CursorPaginationOptions,
 	DebugTokenInfo,
@@ -62,10 +66,12 @@ export type {
 	MockThreadsAPI,
 	OEmbedResponse,
 	PaginationOptions,
+	PendingRepliesOptions,
 	PollAttachment,
 	PollAttachmentInput,
 	PublicProfile,
 	PublishingLimit,
+	PublishResult,
 	QuotaConfig,
 	ReplyControl,
 	ResponseMediaType,
@@ -108,8 +114,10 @@ export { lookupProfile } from "./src/api/lookupProfile.ts";
 
 // ─── Replies ─────────────────────────────────────────────────────────────────
 export { getConversation } from "./src/api/getConversation.ts";
+export { getPendingReplies } from "./src/api/getPendingReplies.ts";
 export { getReplies } from "./src/api/getReplies.ts";
 export { getUserReplies } from "./src/api/getUserReplies.ts";
+export { managePendingReply } from "./src/api/managePendingReply.ts";
 export { manageReply } from "./src/api/manageReply.ts";
 
 // ─── Mentions ────────────────────────────────────────────────────────────────

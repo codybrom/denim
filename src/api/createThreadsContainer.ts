@@ -68,6 +68,21 @@ export async function createThreadsContainer(
 		if (request.isSpoilerMedia !== undefined) {
 			body.append("is_spoiler_media", String(request.isSpoilerMedia));
 		}
+		if (request.enableReplyApprovals !== undefined) {
+			body.append(
+				"enable_reply_approvals",
+				String(request.enableReplyApprovals),
+			);
+		}
+		if (request.shareToIgStory !== undefined) {
+			body.append("crossreshare_to_ig", String(request.shareToIgStory));
+		}
+		if (request.shareToIgStoryDarkMode !== undefined) {
+			body.append(
+				"crossreshare_to_ig_dark_mode",
+				String(request.shareToIgStoryDarkMode),
+			);
+		}
 
 		// JSON-serialized parameters
 		if (request.pollAttachment) {

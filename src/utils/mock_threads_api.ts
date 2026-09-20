@@ -101,7 +101,13 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		_accessToken: string,
 		containerId: string,
 		getPermalink: boolean = false,
-	): Promise<string | { id: string; permalink: string }> {
+	): Promise<
+		string | {
+			id: string;
+			permalink: string;
+			crossreshare_to_ig_status?: "SUCCESS" | "FAILED";
+		}
+	> {
 		if (this.errorMode) {
 			return Promise.reject(new Error("Failed to publish Threads container"));
 		}
@@ -377,6 +383,36 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		return Promise.resolve({ success: true });
 	}
 
+	getPendingReplies(
+		_mediaId: string,
+		_accessToken: string,
+		_options?: CursorPaginationOptions,
+		_fields?: string[],
+		_reverse?: boolean,
+		_approvalStatus?: "pending" | "ignored",
+	): Promise<ThreadsListResponse> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to get pending replies"));
+		}
+		return Promise.resolve({
+			data: Array.from(this.posts.values()).slice(0, 25),
+			paging: {
+				cursors: { before: "BEFORE_CURSOR", after: "AFTER_CURSOR" },
+			},
+		});
+	}
+
+	managePendingReply(
+		_replyId: string,
+		_accessToken: string,
+		_approve: boolean,
+	): Promise<{ success: boolean }> {
+		if (this.errorMode) {
+			return Promise.reject(new Error("Failed to manage pending reply"));
+		}
+		return Promise.resolve({ success: true });
+	}
+
 	getMentions(
 		_userId: string,
 		_accessToken: string,
@@ -504,6 +540,7 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 		return Promise.resolve({
 			access_token: "short_lived_token_abc123",
 			user_id: "12345",
+			token_type: "bearer",
 		});
 	}
 
@@ -564,8 +601,8 @@ export class MockThreadsAPIImpl implements MockThreadsAPI {
 	}
 
 	getOEmbed(
-		_accessToken: string,
-		_url: string,
+		_accessTokenOrUrl: string,
+		_urlOrUndefined?: string,
 		_maxWidth?: number,
 	): Promise<OEmbedResponse> {
 		if (this.errorMode) {

@@ -136,6 +136,12 @@ export interface ThreadsPostRequest {
 	isGhostPost?: boolean;
 	/** Location ID to tag (optional) */
 	locationId?: string;
+	/** Enable reply approvals — replies must be approved before publishing (optional, cannot be used with isGhostPost) */
+	enableReplyApprovals?: boolean;
+	/** Cross-share the post to the linked Instagram account as a Story (optional, any media type, requires `threads_share_to_instagram` permission) */
+	shareToIgStory?: boolean;
+	/** Cross-share the post to the linked Instagram account as a Story in dark mode (optional, any media type, requires `threads_share_to_instagram` permission) */
+	shareToIgStoryDarkMode?: boolean;
 }
 
 /**
@@ -163,6 +169,33 @@ export interface CursorPaginationOptions {
 	before?: string;
 	/** Cursor for next page */
 	after?: string;
+}
+
+/**
+ * Approval status filter for pending replies.
+ * `pending` shows only pending replies, `ignored` shows only ignored replies.
+ * Default (omitted) returns both.
+ */
+export type ApprovalStatus = "pending" | "ignored";
+
+/**
+ * Options for pending replies retrieval.
+ */
+export interface PendingRepliesOptions extends CursorPaginationOptions {
+	/** Filter by approval status (optional, default returns both) */
+	approval_status?: ApprovalStatus;
+}
+
+/**
+ * Result of publishing a Threads media container.
+ */
+export interface PublishResult {
+	/** The published Threads media ID */
+	id: string;
+	/** Permalink (only populated when requested via `getPermalink`) */
+	permalink?: string;
+	/** Cross-share to Instagram Story status (only when cross-sharing was requested) */
+	crossreshare_to_ig_status?: "SUCCESS" | "FAILED";
 }
 
 // ─── Response Types (snake_case — matching API reality) ──────────────────────
@@ -319,6 +352,8 @@ export interface ThreadsPost {
 	ghost_post_expiration_timestamp?: string;
 	/** List of country codes where the post is visible */
 	allowlisted_country_codes?: string[];
+	/** Approval status of a pending reply (`pending` or `ignored`) */
+	reply_approval_status?: "pending" | "ignored";
 }
 
 /**
@@ -552,12 +587,15 @@ export interface LocationSearchOptions {
 
 /**
  * Response from exchanging an OAuth authorization code for a short-lived token.
+ * Since August 12, 2026 the API also returns `token_type`.
  */
 export interface AuthCodeResponse {
 	/** The short-lived access token */
 	access_token: string;
 	/** The user ID of the authenticated user */
 	user_id: string;
+	/** Token type (e.g., "bearer"). Present since August 12, 2026. */
+	token_type?: string;
 }
 
 /**
@@ -760,7 +798,14 @@ export interface MockThreadsAPI {
 		accessToken: string,
 		containerId: string,
 		getPermalink?: boolean,
-	): Promise<string | { id: string; permalink: string }>;
+	): Promise<
+		| string
+		| {
+			id: string;
+			permalink: string;
+			crossreshare_to_ig_status?: "SUCCESS" | "FAILED";
+		}
+	>;
 
 	createCarouselItem(
 		request: Omit<ThreadsPostRequest, "mediaType"> & {
@@ -853,6 +898,21 @@ export interface MockThreadsAPI {
 		hide: boolean,
 	): Promise<{ success: boolean }>;
 
+	getPendingReplies(
+		mediaId: string,
+		accessToken: string,
+		options?: CursorPaginationOptions,
+		fields?: string[],
+		reverse?: boolean,
+		approvalStatus?: ApprovalStatus,
+	): Promise<ThreadsListResponse>;
+
+	managePendingReply(
+		replyId: string,
+		accessToken: string,
+		approve: boolean,
+	): Promise<{ success: boolean }>;
+
 	getMentions(
 		userId: string,
 		accessToken: string,
@@ -918,8 +978,8 @@ export interface MockThreadsAPI {
 	): Promise<DebugTokenInfo>;
 
 	getOEmbed(
-		accessToken: string,
-		url: string,
+		accessTokenOrUrl: string,
+		urlOrUndefined?: string,
 		maxWidth?: number,
 	): Promise<OEmbedResponse>;
 }

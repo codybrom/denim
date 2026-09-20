@@ -65,6 +65,12 @@ export const REPLY_FIELDS = [
 	"reposted_post",
 	"gif_url",
 	"topic_tag",
+	"reply_approval_status",
+] as const;
+
+/** Fields for pending replies endpoint (same as replies, includes approval status) */
+export const PENDING_REPLY_FIELDS = [
+	...REPLY_FIELDS,
 ] as const;
 
 /** Fields for location endpoints */

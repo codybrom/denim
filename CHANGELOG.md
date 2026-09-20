@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-09-20
+
+### Added
+
+- Reply Approvals (Feb 13, 2026 API): `enableReplyApprovals` on
+  `ThreadsPostRequest`, `getPendingReplies()` (`GET /{media-id}/pending_replies`
+  with `approval_status` filter), `managePendingReply()`
+  (`POST /{reply-id}/manage_pending_reply`), `reply_approval_status` on
+  `ThreadsPost`, and `ApprovalStatus` / `PendingRepliesOptions` types. Ghost
+  posts cannot combine with reply approvals.
+- Share to Instagram Stories (Mar 25, 2026 API): `shareToIgStory` and
+  `shareToIgStoryDarkMode` on `ThreadsPostRequest` (`crossreshare_to_ig` /
+  `crossreshare_to_ig_dark_mode`, requires `threads_share_to_instagram`
+  permission). `publishThreadsContainer` with `getPermalink: true` now also
+  returns `crossreshare_to_ig_status`.
+
+### Changed
+
+- `getOEmbed()` no longer requires an access token (Mar 3, 2026 API). Preferred
+  order is now `getOEmbed(postUrl, accessToken?, maxWidth?)`; legacy
+  `getOEmbed(accessToken, postUrl, maxWidth?)` still works.
+- `AuthCodeResponse` now includes optional `token_type` (Aug 12, 2026 API).
+
 ## [2.0.2] - 2026-07-11
 
 ### Fixed

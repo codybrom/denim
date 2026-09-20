@@ -115,6 +115,15 @@ made by a user.
 `manageReply(replyId, accessToken, hide)` hides or unhides a reply. Pass `true`
 to hide, `false` to unhide.
 
+`getPendingReplies(mediaId, accessToken, options?, fields?, reverse?,
+approvalStatus?)`
+returns replies awaiting approval on posts created with
+`enableReplyApprovals: true`. Filter with `"pending"` or `"ignored"` (default
+returns both).
+
+`managePendingReply(replyId, accessToken, approve)` approves (`true`) or ignores
+(`false`) a pending reply. Ignored replies can still be approved later.
+
 ## Insights
 
 `getMediaInsights(mediaId, accessToken, metrics)` returns metrics for a post.
@@ -150,7 +159,7 @@ objects with IDs you can pass to `createThreadsContainer` as `locationId`.
 
 `exchangeCodeForToken(clientId, clientSecret, code, redirectUri)` exchanges an
 OAuth authorization code for a short-lived access token. Returns
-`{ access_token, user_id }`.
+`{ access_token, user_id, token_type? }` (`token_type` present since Aug 2026).
 
 `getAppAccessToken(clientId, clientSecret)` gets an app-level access token via
 client credentials. Returns `{ access_token, token_type }`.
@@ -172,8 +181,17 @@ quota, reply quota, and remaining usage.
 `getMentions(userId, accessToken, options?, fields?)` returns posts that mention
 the authenticated user.
 
-`getOEmbed(accessToken, url, maxWidth?)` returns embeddable HTML for a Threads
-post URL. Returns `{ html, provider_name, type, version, width }`.
+`getOEmbed(postUrl, accessToken?, maxWidth?)` returns embeddable HTML for a
+Threads post URL. No access token required since Mar 2026. Legacy
+`getOEmbed(accessToken, url, maxWidth?)` order still works. Returns
+`{ html, provider_name, type, version, width }`.
+
+`createThreadsContainer` accepts `enableReplyApprovals?: boolean` (cannot be
+combined with `isGhostPost`), plus `shareToIgStory?: boolean` and
+`shareToIgStoryDarkMode?: boolean` for cross-sharing to the linked Instagram
+account as a Story (requires `threads_share_to_instagram` permission).
+`publishThreadsContainer(..., getPermalink=true)` may also return
+`crossreshare_to_ig_status: "SUCCESS" | "FAILED"`.
 
 ## Utilities
 

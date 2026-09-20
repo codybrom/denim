@@ -51,6 +51,11 @@ export async function validateRequest(
 		if (request.replyToId) {
 			throw new Error("isGhostPost cannot be used together with replyToId");
 		}
+		if (request.enableReplyApprovals) {
+			throw new Error(
+				"enableReplyApprovals cannot be used together with isGhostPost",
+			);
+		}
 	}
 
 	// Text attachment can only be used with TEXT posts and not with polls
