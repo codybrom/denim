@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-10-05
+
+### Fixed
+
+- The npm package now ships compiled ESM (`dist/*.js`) with `.d.ts`
+  declarations instead of raw `.ts` source, so Node, bundlers and `tsc` consume
+  it like any other package. Previously consumers type-checked Denim's source
+  under their own settings, which failed where `Response.json()` returns
+  `unknown` (e.g. `@cloudflare/workers-types`).
+- Typed the remaining untyped `response.json()` results in
+  `getPublishingLimit`, `publishThreadsContainer` and `checkContainerStatus`.
+
 ## [2.1.0] - 2026-09-20
 
 ### Added

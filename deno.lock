@@ -18,6 +18,11 @@
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@^1.0.18"
-    ]
+    ],
+    "packageJson": {
+      "dependencies": [
+        "npm:typescript@^7.0.2"
+      ]
+    }
   }
 }

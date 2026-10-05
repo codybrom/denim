@@ -11,6 +11,8 @@ on:
       - "deno.json"
       - "deno.lock"
       - "package.json"
+      - "package-lock.json"
+      - "tsconfig.npm.json"
 
 jobs:
   publish:
@@ -36,6 +38,9 @@ jobs:
         with:
           node-version: "24.x"
           registry-url: "https://registry.npmjs.org"
+
+      - name: Install npm build dependencies
+        run: npm ci
 
       - name: Publish package to NPM
         run: npm publish --provenance --access public

@@ -1,4 +1,10 @@
 import { THREADS_API_BASE_URL } from "../constants.ts";
+
+interface ContainerStatus {
+	status: "EXPIRED" | "ERROR" | "FINISHED" | "IN_PROGRESS" | "PUBLISHED";
+	error_message?: string;
+}
+
 /**
  * Checks the status of a Threads container.
  *
@@ -10,10 +16,7 @@ import { THREADS_API_BASE_URL } from "../constants.ts";
 export async function checkContainerStatus(
 	containerId: string,
 	accessToken: string,
-): Promise<{
-	status: "EXPIRED" | "ERROR" | "FINISHED" | "IN_PROGRESS" | "PUBLISHED";
-	error_message?: string;
-}> {
+): Promise<ContainerStatus> {
 	const url = new URL(`${THREADS_API_BASE_URL}/${containerId}`);
 	url.searchParams.append("fields", "status,error_message");
 	url.searchParams.append("access_token", accessToken);
@@ -26,14 +29,9 @@ export async function checkContainerStatus(
 		);
 	}
 
-	const data = await response.json();
+	const data: ContainerStatus = await response.json();
 	return {
-		status: data.status as
-			| "EXPIRED"
-			| "ERROR"
-			| "FINISHED"
-			| "IN_PROGRESS"
-			| "PUBLISHED",
+		status: data.status,
 		error_message: data.error_message,
 	};
 }

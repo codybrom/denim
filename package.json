@@ -1,10 +1,26 @@
 {
 	"name": "@codybrom/denim",
-	"version": "2.1.0",
+	"version": "2.1.1",
 	"description": "A Deno/TypeScript library for the Threads API",
-	"main": "mod.ts",
-	"directories": {
-		"example": "examples"
+	"type": "module",
+	"main": "./dist/mod.js",
+	"types": "./dist/mod.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/mod.d.ts",
+			"default": "./dist/mod.js"
+		}
+	},
+	"files": [
+		"dist",
+		"readme.md",
+		"CHANGELOG.md",
+		"LICENSE"
+	],
+	"sideEffects": false,
+	"scripts": {
+		"build": "tsc -p tsconfig.npm.json",
+		"prepublishOnly": "npm run build"
 	},
 	"repository": {
 		"type": "git",
@@ -19,5 +35,8 @@
 	"bugs": {
 		"url": "https://github.com/codybrom/denim/issues"
 	},
-	"homepage": "https://github.com/codybrom/denim#readme"
+	"homepage": "https://github.com/codybrom/denim#readme",
+	"devDependencies": {
+		"typescript": "^7.0.2"
+	}
 }

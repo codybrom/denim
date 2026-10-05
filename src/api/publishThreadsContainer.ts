@@ -1,4 +1,5 @@
 import { THREADS_API_BASE_URL } from "../constants.ts";
+import type { PublishResult } from "../types.ts";
 import { checkContainerStatus } from "../utils/checkContainerStatus.ts";
 import { getAPI } from "../utils/getAPI.ts";
 import { getSingleThread } from "./getSingleThread.ts";
@@ -85,7 +86,8 @@ export async function publishThreadsContainer(
 			);
 		}
 
-		const publishData = await publishResponse.json();
+		const publishData: Omit<PublishResult, "permalink"> = await publishResponse
+			.json();
 
 		if (getPermalink) {
 			const threadData = await getSingleThread(publishData.id, accessToken);

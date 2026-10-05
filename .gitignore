@@ -15,3 +15,7 @@
 
 # Project notes
 /notes
+
+# npm build
+node_modules
+dist
